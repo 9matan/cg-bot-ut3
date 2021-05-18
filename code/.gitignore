@@ -51,3 +51,7 @@ bld/
 
 #Visaul studio
 .vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.users

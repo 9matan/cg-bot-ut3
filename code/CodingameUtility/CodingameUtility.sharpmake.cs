@@ -8,8 +8,11 @@ public class CodingameUtilityProject : CommonProject
         Name = "CodingameUtility";
         SourceRootPath = @"[project.SharpmakeCsPath]";
     }
+
     public override void ConfigureAll(Project.Configuration conf, Target target)
     {
+        base.ConfigureAll(conf, target);
+
         conf.PrecompHeader = "CodingameUtility_PCH.h";
         conf.PrecompSource = "CodingameUtility_PCH.cpp";
 

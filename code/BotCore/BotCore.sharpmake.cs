@@ -1,11 +1,11 @@
 using Sharpmake;
 
 [Generate]
-public class CodingameUtilityProject : CommonProject
+public class BotCoreProject : CommonProject
 {
-    public CodingameUtilityProject()
+    public BotCoreProject()
     {
-        Name = "CodingameUtility";
+        Name = "BotCore";
         SourceRootPath = @"[project.SharpmakeCsPath]";
     }
 
@@ -13,8 +13,8 @@ public class CodingameUtilityProject : CommonProject
     {
         base.ConfigureAll(conf, target);
 
-        conf.PrecompHeader = "CodingameUtility_PCH.h";
-        conf.PrecompSource = "CodingameUtility_PCH.cpp";
+        conf.PrecompHeader = "BotCore_PCH.h";
+        conf.PrecompSource = "BotCore_PCH.cpp";
 
         conf.IncludePaths.Add(@"[project.SourceRootPath]\code");
         conf.IncludePaths.Add(@"[project.SourceRootPath]");

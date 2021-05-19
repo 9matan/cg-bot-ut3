@@ -1,11 +1,11 @@
 using Sharpmake;
 
 [Generate]
-public class BotCoreTestProject : CommonProject
+public class BotAppProject : CommonProject
 {
-    public BotCoreTestProject()
+    public BotAppProject()
     {
-        Name = "BotCore_Test";
+        Name = "BotApp";
         SourceRootPath = @"[project.SharpmakeCsPath]";
     }
 
@@ -13,7 +13,7 @@ public class BotCoreTestProject : CommonProject
     {
         base.ConfigureAll(conf, target);
 
-        conf.IncludePrivatePaths.Add(@"[project.SourceRootPath]");
+        conf.IncludePaths.Add(@"[project.SourceRootPath]");
 
         conf.AddPrivateDependency<BotCoreProject>(target);
     }

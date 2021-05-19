@@ -16,7 +16,6 @@ public class BotCoreProject : CommonProject
         conf.PrecompHeader = "BotCore_PCH.h";
         conf.PrecompSource = "BotCore_PCH.cpp";
 
-        conf.IncludePaths.Add(@"[project.SourceRootPath]\code");
         conf.IncludePaths.Add(@"[project.SourceRootPath]");
 
         conf.Output = Configuration.OutputType.Lib;

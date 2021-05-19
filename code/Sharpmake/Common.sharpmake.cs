@@ -1,6 +1,11 @@
 using System.IO;
 using Sharpmake;
 
+public class PackedProjectInfo
+{
+    public static string PackerFileName = "packer.bat";
+}
+
 [Generate]
 public class CommonProject : Project
 {

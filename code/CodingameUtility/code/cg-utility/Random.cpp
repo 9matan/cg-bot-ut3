@@ -6,7 +6,7 @@
 
 unsigned int UpdateRandomSeed()
 {
-    unsigned int const seed = (unsigned int)time(nullptr);
+    unsigned int const seed = static_cast<unsigned int>(time(nullptr));
     srand(seed);
     return seed;
 }

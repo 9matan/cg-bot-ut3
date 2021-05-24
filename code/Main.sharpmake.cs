@@ -4,7 +4,6 @@ using Sharpmake;
 [module: Sharpmake.Include(@"BotApp_Packed\BotApp_Packed.sharpmake.cs")]
 [module: Sharpmake.Include(@"BotCore\BotCore.sharpmake.cs")]
 [module: Sharpmake.Include(@"BotCore_Test\BotCore_Test.sharpmake.cs")]
-[module: Sharpmake.Include(@"CodingameUtility\CodingameUtility.sharpmake.cs")]
 [module: Sharpmake.Include(@"Sharpmake\Common.sharpmake.cs")]
 
 [Generate]
@@ -32,7 +31,6 @@ public class CGBotSolution : CommonSolution
 		conf.AddProject<BotAppPackedProject>(target);
 		conf.AddProject<BotCoreProject>(target);
 		conf.AddProject<BotCoreTestProject>(target);
-		conf.AddProject<CodingameUtilityProject>(target);
     }
 
 	public void OnGeneratedCallBack(string solutionPath, string solutionFile, string solutionExtension)

@@ -1,1 +1,0 @@
-#include "CodingameUtility_PCH.h"

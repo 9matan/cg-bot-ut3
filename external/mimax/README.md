@@ -1,0 +1,2 @@
+# mimax
+Mini-max algorithm

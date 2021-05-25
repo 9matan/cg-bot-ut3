@@ -1,11 +1,11 @@
 using Sharpmake;
 
 [Generate]
-public class BotCoreProject : CommonProject
+public class MimaxCommonProject : CommonProject
 {
-    public BotCoreProject()
+    public MimaxCommonProject()
     {
-        Name = "BotCore";
+        Name = "MimaxCommon";
         SourceRootPath = @"[project.SharpmakeCsPath]";
     }
 
@@ -13,13 +13,11 @@ public class BotCoreProject : CommonProject
     {
         base.ConfigureAll(conf, target);
 
-        conf.PrecompHeader = "BotCore_PCH.h";
-        conf.PrecompSource = "BotCore_PCH.cpp";
+        conf.PrecompHeader = "MimaxCommon_PCH.h";
+        conf.PrecompSource = "MimaxCommon_PCH.cpp";
 
         conf.IncludePaths.Add(@"[project.SourceRootPath]");
 
         conf.Output = Configuration.OutputType.Lib;
-
-        conf.AddPublicDependency<MimaxCommonProject>(target);
     }
 }

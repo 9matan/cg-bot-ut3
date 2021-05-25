@@ -6,6 +6,10 @@ using Sharpmake;
 [module: Sharpmake.Include(@"BotCore_Test\BotCore_Test.sharpmake.cs")]
 [module: Sharpmake.Include(@"Sharpmake\Common.sharpmake.cs")]
 
+// Mimax
+[module: Sharpmake.Include(@"..\external\mimax\code\MimaxCommon\MimaxCommon.sharpmake.cs")]
+[module: Sharpmake.Include(@"..\external\mimax\code\Minimax\Minimax.sharpmake.cs")]
+
 [Generate]
 public class CGBotSolution : CommonSolution
 {
@@ -26,6 +30,9 @@ public class CGBotSolution : CommonSolution
 		base.ConfigureAll(conf, target);
 		
         conf.SolutionPath = @"[solution.SharpmakeCsPath]\Sharpmake\generated";
+		
+		conf.AddProject<MimaxCommonProject>(target);
+		conf.AddProject<MinimaxProject>(target);
 		
 		conf.AddProject<BotAppProject>(target);
 		conf.AddProject<BotAppPackedProject>(target);

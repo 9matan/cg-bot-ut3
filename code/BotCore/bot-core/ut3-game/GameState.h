@@ -2,52 +2,7 @@
 
 namespace ut3
 {
-    struct SGameState
-    {
-        // the first 162 bits describe elements (2 bits per element)
-        //      00 - empty
-        //      10 - X
-        //      01 - O
-        //      11 - Draw
-        //      0..63 bits from m_data[0]
-        //      0..61 bits from m_data[1]
-        //      0..35 bits from m_data[2]
-        //          block 0: 0..17 from m_data[0]
-        //          block 1: 18..35 from m_data[0]
-        //          block 2: 36..53 from m_data[0]
-        //          block 3: 54..63 from m_data[0] | 0..7 from m_data[1]
-        //          block 4: 8..25 from m_data[1]
-        //          block 5: 26..43 from m_data[1]
-        //          block 6: 44..61 from m_data[1]
-        //          block 7: 0..17 from m_data[2]
-        //          block 8: 18..35 from m_data[2]
-        // the next 18 bits describe status of each block (2 bits per block)
-        // 0 - has empty cells, 1 - X won, 2 - O won, 3 - draw
-        //      36..53 bits from m_data[2]
-        // the last bit - who makes a turn (0 - X, 1 - O)
-        //      63th bit from m_data[2]
-        unsigned long long m_data[3] = {0};
-    };
-
-    static_assert(sizeof(SGameState) == 8*3, "SGameState has invalid size");
-
-    struct SGameBlockState
-    {
-        // the first 18 bits describe elements (2 bits per element)
-        //      00 - empty
-        //      10 - X
-        //      01 - O
-        //      11 - Draw
-        unsigned int m_data = 0;
-
-        inline bool operator==(SGameBlockState other) const { return m_data == other.m_data; }
-    };
-
-    static_assert(sizeof(SGameBlockState) == 4, "SGameBlockState has invalid size");
-
-#   define UT3_BITS_MASK_64() (~(0ULL))
-    // do not pass bitsCount = 64
-#   define UT3_FIRST_BITS_MASK(bitsCount) (assert((bitsCount)<64), ((1ULL << (bitsCount)) - 1))
+#   define UT3_FIRST_BITS_MASK(bitsCount)  ((~(1ULL)) >> (64 - bitsCount)) //((1ULL << (bitsCount)) - 1)
 
 #   define UT3_SET_BIT(number, bitPos, bitVal) number = ((number & (~(1ULL << (bitPos)))) | ((unsigned long long)((bitVal) == 0 ? 0 : 1) << (bitPos)))
 #   define UT3_GET_BIT(number, bitPos) (((number) >> (bitPos)) & 1)
@@ -74,6 +29,16 @@ namespace ut3
         UT3_SET_BIT(gameState.m_data[2], 36 + 1 + (2 * blockIndex), value & 2); \
     } while(false)
 
+#   define GAME_STATE_SET_LAST_OPP_TURN_X(gameState, value) UT3_SET_BITS(gameState.m_data[2], 54, 4, (value))
+#   define GAME_STATE_SET_LAST_OPP_TURN_Y(gameState, value) UT3_SET_BITS(gameState.m_data[2], 58, 4, (value))
+#   define GAME_STATE_GET_LAST_OPP_TURN_X(gameState) UT3_GET_BITS((gameState).m_data[2], 54, 4)
+#   define GAME_STATE_GET_LAST_OPP_TURN_Y(gameState) UT3_GET_BITS((gameState).m_data[2], 58, 4)
+#   define GAME_STATE_INVALIDATE_LAST_OPP_TURN(gameState) UT3_SET_BITS((gameState).m_data[2], 54, 4, 15)
+#   define GAME_STATE_IS_VALID_LAST_OPP_TURN(gameState) (UT3_GET_BITS((gameState).m_data[2], 54, 4) != 15)
+
+#   define GAME_STATE_SET_GAME_WINNER(gameState, value) UT3_SET_BITS(gameState.m_data[1], 62, 2, (value))
+#   define GAME_STATE_GET_GAME_WINNER(gameState) UT3_GET_BITS((gameState).m_data[1], 62, 2)
+
 #   define GAME_BLOCK_STATE_POS_TO_INDEX(posX, posY) ((posX) + (posY) * 3)
 #   define GAME_BLOCK_STATE_SET_ELEMENT(blockState, index, value) do \
     { \
@@ -85,6 +50,59 @@ namespace ut3
 #   define GAME_BLOCK_STATE_GET_ELEMENT_BY_POS(blockState, posX, posY) GAME_BLOCK_STATE_GET_ELEMENT(blockState, GAME_BLOCK_STATE_POS_TO_INDEX(posX, posY))
 
 #   define GAME_STATE_GET_GLOBAL_BLOCK(gameState) SGameBlockState{ ((gameState).m_data[2] >> 36) & UT3_FIRST_BITS_MASK(18) }
+
+    struct SGameState
+    {
+        SGameState()
+        {
+            m_data[0] = m_data[1] = m_data[2] = 0;
+            GAME_STATE_INVALIDATE_LAST_OPP_TURN(*this);
+        }
+        // the first 162 bits describe elements (2 bits per element)
+        //      00 - empty
+        //      10 - X
+        //      01 - O
+        //      11 - Draw
+        //      0..63 bits from m_data[0]
+        //      0..61 bits from m_data[1]
+        //      0..35 bits from m_data[2]
+        //          block 0: 0..17 from m_data[0]
+        //          block 1: 18..35 from m_data[0]
+        //          block 2: 36..53 from m_data[0]
+        //          block 3: 54..63 from m_data[0] | 0..7 from m_data[1]
+        //          block 4: 8..25 from m_data[1]
+        //          block 5: 26..43 from m_data[1]
+        //          block 6: 44..61 from m_data[1]
+        //          block 7: 0..17 from m_data[2]
+        //          block 8: 18..35 from m_data[2]
+        // the next 18 bits describe status of each block (2 bits per block)
+        //      0 - has empty cells, 1 - X won, 2 - O won, 3 - draw
+        //      36..53 bits from m_data[2]
+        // the next 8 bits describe the last opponent turn (4 bits per component)
+        //      54..61 bits from m_data[2]
+        //          54..57 for x
+        //          58..61 for y
+        // the bits 62..63 from m_data[1] describes who won the game
+        // the last bit - who makes a turn (0 - X, 1 - O)
+        //      63th bit from m_data[2]
+        unsigned long long m_data[3];
+    };
+
+    static_assert(sizeof(SGameState) == 8 * 3, "SGameState has invalid size");
+
+    struct SGameBlockState
+    {
+        // the first 18 bits describe elements (2 bits per element)
+        //      00 - empty
+        //      10 - X
+        //      01 - O
+        //      11 - Draw
+        unsigned int m_data = 0;
+
+        inline bool operator==(SGameBlockState other) const { return m_data == other.m_data; }
+    };
+
+    static_assert(sizeof(SGameBlockState) == 4, "SGameBlockState has invalid size");
 
     inline SGameBlockState GetBlockState(SGameState const gameState, size_t const blockIndex)
     {

@@ -24,6 +24,22 @@ namespace ut3
         {
             SGameState state;
 
+            GAME_STATE_SET_LAST_OPP_TURN_X(state, 5);
+            GAME_STATE_SET_LAST_OPP_TURN_Y(state, 8);
+
+            assert(GAME_STATE_GET_LAST_OPP_TURN_X(state) == 5);
+            assert(GAME_STATE_GET_LAST_OPP_TURN_Y(state) == 8);
+        }
+        {
+            SGameState state;
+
+            GAME_STATE_SET_GAME_WINNER(state, GAME_STATE_ELEMENT_O);
+
+            assert(GAME_STATE_GET_GAME_WINNER(state) == GAME_STATE_ELEMENT_O);
+        }
+        {
+            SGameState state;
+
             GAME_STATE_SET_BLOCK_STATUS(state, 0, GAME_STATE_ELEMENT_DRAW);
             GAME_STATE_SET_BLOCK_STATUS(state, 1, GAME_STATE_ELEMENT_O);
             GAME_STATE_SET_BLOCK_STATUS(state, 2, GAME_STATE_ELEMENT_X);

@@ -31,6 +31,8 @@ public class CGBotSolution : CommonSolution
 		conf.AddProject<BotAppPackedProject>(target);
 		conf.AddProject<BotCoreProject>(target);
 		conf.AddProject<BotCoreTestProject>(target);
+
+		conf.SetStartupProject<BotCoreTestProject>();
     }
 
 	public void OnGeneratedCallBack(string solutionPath, string solutionFile, string solutionExtension)

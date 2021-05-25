@@ -1,0 +1,1 @@
+..\..\..\external\sharpmake\bin\Sharpmake.Application.exe /sources('dummy.sharpmake.cs', '..\\..\\main.sharpmake.cs') /generateDebugSolution

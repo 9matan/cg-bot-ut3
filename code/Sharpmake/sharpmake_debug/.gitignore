@@ -1,0 +1,5 @@
+#Visaul studio
+.vs/
+*.sln
+*.csproj
+*.csproj.user

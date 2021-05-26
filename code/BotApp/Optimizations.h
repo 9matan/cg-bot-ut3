@@ -5,3 +5,5 @@
 #	pragma GCC optimize("unroll-loops")
 #	pragma GCC optimize("Ofast")
 #endif // defined(__GNUC__) || defined(__GNUG__)
+
+#define _CRT_SECURE_NO_WARNINGS

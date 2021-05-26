@@ -14,12 +14,12 @@ struct SVec2Base
 
     template<typename TOtherComponent>
     explicit SVec2Base(SVec2Base<TOtherComponent> const other)
-        : m_components(static_cast<TComponent>(other[0]), static_cast<TComponent>(other[1]))
+        : m_components{ static_cast<TComponent>(other[0]), static_cast<TComponent>(other[1]) }
     {}
 
     template<typename TOtherComponent>
     SVec2Base(TOtherComponent const x, TOtherComponent const y)
-        : m_components(static_cast<TComponent>(x), static_cast<TComponent>(y))
+        : m_components{ static_cast<TComponent>(x), static_cast<TComponent>(y) }
     {}
 
     template<typename TOtherComponent>
@@ -33,8 +33,8 @@ struct SVec2Base
             });
     }
 
-    SVec2Base() : m_components(0, 0) {}
-    SVec2Base(TComponent const x, TComponent const y) : m_components(x, y) {}
+    SVec2Base() : m_components{0, 0} {}
+    SVec2Base(TComponent const x, TComponent const y) : m_components{x, y} {}
     SVec2Base(std::initializer_list<TComponent> const& data)
     { 
         assert(data.size() <= ms_vecSize); 
@@ -50,16 +50,10 @@ struct SVec2Base
     inline SVec2Base operator-(SVec2Base const other) const { return SVec2Base(m_data[0] - other.m_data[0], m_data[1] - other.m_data[1]); }
     inline bool operator<(SVec2Base const other) const { if (m_data[0] == other[0]) { return m_data[1] < other[1]; } return m_data[0] < other[0]; }
 
-private:
     union
     {
-        struct SComponents
+        struct
         {
-            SComponents(TComponent x, TComponent y)
-                : m_x(x)
-                , m_y(y)
-            {}
-
             TComponent m_x;
             TComponent m_y;
         } m_components;

@@ -6,9 +6,9 @@
 
 int main()
 {
-	ut3::RunTests_BitGetSet();
-	ut3::RunTests_GameState();
-	ut3::RunTests_Game();
+	ut3::game::RunTests_BitGetSet();
+	ut3::game::RunTests_GameState();
+	ut3::game::RunTests_Game();
 
 	return 0;
 }

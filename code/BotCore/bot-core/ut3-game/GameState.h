@@ -1,7 +1,9 @@
 #pragma once
 
-namespace ut3
-{
+#include <cassert>
+
+namespace ut3 {
+namespace game {
 #   define UT3_FIRST_BITS_MASK(bitsCount)  ((~(1ULL)) >> (64 - bitsCount)) //((1ULL << (bitsCount)) - 1)
 
 #   define UT3_SET_BIT(number, bitPos, bitVal) number = ((number & (~(1ULL << (bitPos)))) | ((unsigned long long)((bitVal) == 0 ? 0 : 1) << (bitPos)))
@@ -49,7 +51,7 @@ namespace ut3
 #   define GAME_BLOCK_STATE_GET_ELEMENT(blockState, index) (((blockState).m_data >> (2 * index)) & 3ULL)
 #   define GAME_BLOCK_STATE_GET_ELEMENT_BY_POS(blockState, posX, posY) GAME_BLOCK_STATE_GET_ELEMENT(blockState, GAME_BLOCK_STATE_POS_TO_INDEX(posX, posY))
 
-#   define GAME_STATE_GET_GLOBAL_BLOCK(gameState) SGameBlockState{ ((gameState).m_data[2] >> 36) & UT3_FIRST_BITS_MASK(18) }
+#   define GAME_STATE_GET_GLOBAL_BLOCK(gameState) ut3::game::SGameBlockState{ ((gameState).m_data[2] >> 36) & UT3_FIRST_BITS_MASK(18) }
 
     struct SGameState
     {
@@ -114,9 +116,13 @@ namespace ut3
         if (blockIndex >= 4)
         {
             if (blockIndex < 7)
+            {
                 return SGameBlockState{ UT3_GET_BITS(gameState.m_data[1], (blockIndex - 4) * 18 + 8, 18) };
+            }
             else
+            {
                 return SGameBlockState{ UT3_GET_BITS(gameState.m_data[2], (blockIndex - 7) * 18, 18) };
+            }
         }
         return SGameBlockState{ (gameState.m_data[0] >> 54) | ((gameState.m_data[1] & UT3_FIRST_BITS_MASK(8)) << 10) };
     }
@@ -131,9 +137,13 @@ namespace ut3
         else if (blockIndex >= 4)
         {
             if (blockIndex < 7)
+            {
                 UT3_SET_BITS(gameState.m_data[1], (blockIndex - 4) * 18 + 8, 18, blockState.m_data);
+            }
             else
+            {
                 UT3_SET_BITS(gameState.m_data[2], (blockIndex - 7) * 18, 18, blockState.m_data);
+            }
         }
         else
         {
@@ -143,4 +153,5 @@ namespace ut3
             UT3_SET_BITS(gameState.m_data[1], 0, 8, secondBits);
         }
     }
+}
 }

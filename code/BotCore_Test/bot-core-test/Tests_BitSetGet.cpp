@@ -2,8 +2,9 @@
 
 #include "bot-core/ut3-game/GameState.h"
 
-namespace ut3
-{
+namespace ut3 {
+namespace game {
+
     void RunTests_BitGetSet()
     {
         {
@@ -98,4 +99,5 @@ namespace ut3
             assert(UT3_FIRST_BITS_MASK(56) == 72057594037927935ULL);
         }
     }
+}
 }

@@ -19,7 +19,7 @@ namespace
 
 #   define GET_WINNER_MASK_FOR_PLAYER(mask, playerIndex) ((mask) << (playerIndex))
 
-    inline void AddAvailableTurns(ut3::game::Turns& turnsOut, ut3::SGameBlockState block, int const blockX, int const blockY)
+    inline void AddAvailableTurns(ut3::game::Turns& turnsOut, ut3::game::SGameBlockState block, int const blockX, int const blockY)
     {
         for (int x = 0; x < 3; ++x)
         {
@@ -101,8 +101,8 @@ namespace game {
         bool findAllTurns = true;
         if (GAME_STATE_IS_VALID_LAST_OPP_TURN(gameState))
         {
-            int const blockX = GAME_STATE_GET_LAST_OPP_TURN_X(gameState) / 3;
-            int const blockY = GAME_STATE_GET_LAST_OPP_TURN_Y(gameState) / 3;
+            int const blockX = GAME_STATE_GET_LAST_OPP_TURN_X(gameState) % 3;
+            int const blockY = GAME_STATE_GET_LAST_OPP_TURN_Y(gameState) % 3;
             int const blockIndex = GAME_BLOCK_STATE_POS_TO_INDEX(blockX, blockY);
 
             if (GAME_STATE_GET_BLOCK_STATUS(gameState, blockIndex) == GAME_STATE_ELEMENT_EMPTY)

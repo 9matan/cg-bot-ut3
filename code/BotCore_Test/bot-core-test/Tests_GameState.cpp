@@ -2,8 +2,9 @@
 
 #include "bot-core/ut3-game/GameState.h"
 
-namespace ut3
-{
+namespace ut3 {
+namespace game {
+
     void RunTests_GameState_GlobalData()
     {
         {
@@ -182,4 +183,5 @@ namespace ut3
         RunTests_GameState_GetSetBlockElement();
         RunTests_GameState_GetSetBlock();
     }
+}
 }

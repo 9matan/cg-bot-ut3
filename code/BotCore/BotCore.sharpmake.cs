@@ -21,5 +21,6 @@ public class BotCoreProject : CommonProject
         conf.Output = Configuration.OutputType.Lib;
 
         conf.AddPublicDependency<MimaxCommonProject>(target);
+        conf.AddPublicDependency<MinimaxProject>(target);
     }
 }

@@ -21,7 +21,7 @@ private:
 }
 
 #ifndef DISABLE_PROFILER
-#define PROFILE_TIME(name) CTimeProfiler timeProfiler(name);
+#define PROFILE_TIME(name) mimax::common::CTimeProfiler timeProfiler(name);
 #else
 #define PROFILE_TIME(name)
 #endif // #ifdef DISABLE_PROFILER

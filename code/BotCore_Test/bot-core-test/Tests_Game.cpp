@@ -2,12 +2,11 @@
 
 #include "bot-core/ut3-game/Game.h"
 
-namespace ut3
-{
+namespace ut3 {
+namespace game {
+
     void RunTests_Game_CalculateWinner()
     {
-        using namespace ut3::game;
-
         // there is a winner (game block state)
         {
             // rows
@@ -228,4 +227,5 @@ namespace ut3
         RunTests_Game_MakeTurn();
         RunTests_Game_CollectPossibleTurns();
     }
+}
 }

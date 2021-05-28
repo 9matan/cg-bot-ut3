@@ -65,9 +65,10 @@ using SVec2i = SVec2Base<int>;
 using SVec2u = SVec2Base<unsigned int>;
 using SVec2si = SVec2Base<short>;
 using SVec2su = SVec2Base<unsigned short>;
+using SVec2char = mimax::common::SVec2Base<char>;
 
 }
 }
 
 // Set default for your project
-using SVec2 = mimax::common::SVec2Base<char>;
+using SVec2 = mimax::common::SVec2char;

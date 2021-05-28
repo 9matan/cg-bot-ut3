@@ -154,6 +154,26 @@ namespace game {
             assert(GAME_BLOCK_STATE_GET_ELEMENT(blockState, 3) == GAME_STATE_ELEMENT_DRAW);
             assert(GAME_BLOCK_STATE_GET_ELEMENT(blockState, 8) == GAME_STATE_ELEMENT_O);
         }
+        {
+            SGameBlockState blockState;
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 2, GAME_STATE_ELEMENT_DRAW);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 3, GAME_STATE_ELEMENT_DRAW);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 4, GAME_STATE_ELEMENT_DRAW);
+
+            assert(GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(blockState) == 3);
+        }
+        {
+            SGameBlockState blockState;
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 0, GAME_STATE_ELEMENT_X);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 2, GAME_STATE_ELEMENT_O);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 3, GAME_STATE_ELEMENT_O);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 4, GAME_STATE_ELEMENT_DRAW);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 7, GAME_STATE_ELEMENT_X);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState, 8, GAME_STATE_ELEMENT_X);
+
+            assert(GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(blockState, 0) == 3);
+            assert(GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(blockState, 1) == 2);
+        }
     }
 
     void RunTests_GameState_GetSetBlock()

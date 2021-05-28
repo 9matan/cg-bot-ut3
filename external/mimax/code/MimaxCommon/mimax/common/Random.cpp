@@ -14,7 +14,7 @@ unsigned int UpdateRandomSeed()
     return seed;
 }
 
-unsigned int GetRandomUInt(unsigned int const minVal, unsigned int const maxVal)
+unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal)
 {
     assert(minVal < maxVal);
     unsigned int const range = maxVal - minVal;

@@ -7,7 +7,7 @@
 
 void ReadData(ut3::SInputData& inputData)
 {
-	std::cin >> inputData.m_oppTurnX >> inputData.m_oppTurnY;
+	std::cin >> inputData.m_oppTurnY >> inputData.m_oppTurnX;
 
 	int validActionCount;
 	scanf("%i", &validActionCount);
@@ -20,7 +20,7 @@ void ReadData(ut3::SInputData& inputData)
 
 void WriteData(ut3::SOutputData const& outputData)
 {
-	std::cout << outputData.m_turnX << " " << outputData.m_turnY << "\n";
+	std::cout << outputData.m_turnY << " " << outputData.m_turnX << "\n";
 }
 
 int main()

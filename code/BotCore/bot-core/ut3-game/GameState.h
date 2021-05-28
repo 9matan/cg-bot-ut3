@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <cassert>
 
 namespace ut3 {
@@ -11,6 +12,9 @@ namespace game {
 
 #   define UT3_SET_BITS(number, bitStartPos, bitsCount, bitsVal) number = ((number & (~(UT3_FIRST_BITS_MASK((unsigned long long)(bitsCount)) << (bitStartPos)))) | (((unsigned long long)(bitsVal)) << (bitStartPos)))
 #   define UT3_GET_BITS(number, bitStartPos, bitsCount) (((number) >> (bitStartPos)) & UT3_FIRST_BITS_MASK((unsigned long long)(bitsCount)))
+
+#   define UT3_COUNT_BITS_32(number) (std::bitset<32>(number).count())
+#   define UT3_COUNT_BITS_64(number) (std::bitset<64>(number).count())
 
     // 0 - X, 1 - O
 #   define GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(playerIndex) (1ULL << playerIndex)
@@ -52,6 +56,14 @@ namespace game {
 #   define GAME_BLOCK_STATE_GET_ELEMENT_BY_POS(blockState, posX, posY) GAME_BLOCK_STATE_GET_ELEMENT(blockState, GAME_BLOCK_STATE_POS_TO_INDEX(posX, posY))
 
 #   define GAME_STATE_GET_GLOBAL_BLOCK(gameState) ut3::game::SGameBlockState{ ((gameState).m_data[2] >> 36) & UT3_FIRST_BITS_MASK(18) }
+
+    constexpr unsigned int BLOCK_PLAYER_ELEMENTS_MASKS[2] = {
+        87381,
+        174762
+    };
+
+#   define GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(blockState, playerIndex) ((int)UT3_COUNT_BITS_32((blockState).m_data & ut3::game::BLOCK_PLAYER_ELEMENTS_MASKS[(playerIndex)]) - (int)GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(blockState))
+#   define GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(blockState) UT3_COUNT_BITS_32(((blockState).m_data) & (((blockState).m_data & ut3::game::BLOCK_PLAYER_ELEMENTS_MASKS[1]) >> 1))
 
     struct SGameState
     {

@@ -1,12 +1,15 @@
 #include "BotCore_PCH.h"
 #include "bot-core/bot/MinimaxBot.h"
 
-#include <bitset>
 #include <chrono>
 #include <thread>
 
+#include "mimax/common/Random.h"
+#include "mimax/common/Vec2Helper.h"
 #include "mimax/minimax/MinimaxAlgorithmBase.h"
+
 #include "bot-core/ut3-game/Game.h"
+#include "bot-core/ut3-game/GameStateView.h"
 
 using namespace std::chrono_literals;
 
@@ -14,11 +17,6 @@ namespace ut3
 {
     namespace
     {
-        constexpr unsigned int PLAYERS_GLOBAL_BLOCK_MASKS[2] = {
-            87381,
-            174762
-        };
-
         class CUT3MinimaxResolver
         {
         public:
@@ -38,10 +36,10 @@ namespace ut3
 
                 auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);
 
-                int const oppPlayer = (m_myPlayer & 1);
+                int const oppPlayer = ((m_myPlayer + 1) & 1);
                 
-                size_t const myBlocksCnt = std::bitset<32>(globalBlock.m_data & PLAYERS_GLOBAL_BLOCK_MASKS[m_myPlayer]).count();
-                size_t const oppBlocksCnt = std::bitset<32>(globalBlock.m_data & PLAYERS_GLOBAL_BLOCK_MASKS[oppPlayer]).count();
+                int const myBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, m_myPlayer);
+                int const oppBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, oppPlayer);
 
                 return (float)(myBlocksCnt - oppBlocksCnt);
             }
@@ -49,6 +47,7 @@ namespace ut3
             void GetPossibleMoves(game::Turns& turnsOut, game::SGameState const& state)
             {
                 game::CollectPossibleTurns(state, turnsOut);
+                mimax::common::RandomShuffle(turnsOut.begin(), turnsOut.end());
             }
 
             void MakeMove(game::SGameState& state, SVec2 move)
@@ -68,6 +67,9 @@ namespace ut3
 
     SOutputData CMinimaxBot::FirstUpdate(SInputData initData)
     {
+        int const randomSeed = mimax::common::UpdateRandomSeed();
+        std::cerr << "Random seed: " << randomSeed << "\n";
+
         if (initData.m_oppTurnX >= 0)
         {
             m_myPlayer = 1;
@@ -90,6 +92,12 @@ namespace ut3
 
         CUT3MinimaxAlgo minimax(5, CUT3MinimaxResolver(m_myPlayer));
         SVec2 turn1 = minimax.Solve(m_gameState);
+
+#if MIMAX_MINIMAX_DEBUG
+        auto const& debugInfo = minimax.GetDebugInfo();
+        std::cerr << "Visited nodes count: " << debugInfo.m_visitedNodesCnt << "\n";
+        std::cerr << "Evaluated nodes count: " << debugInfo.m_evaluatedNodesCnt << "\n";
+#endif // MIMAX_MINIMAX_DEBUG
 
         game::MakeTurn(m_gameState, turn1[0], turn1[1]);
         return { turn1[0], turn1[1] };

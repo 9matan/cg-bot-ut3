@@ -14,8 +14,8 @@ inline int GetDistanceL1(TVec const lhs, TVec const rhs) { return abs(static_cas
 char const* ToString(SVec2i const vec2);
 char const* ToString(SVec2 const vec2);
 
-std::ostream& operator<<(std::ostream& out, SVec2 const& vec);
-std::istream& operator>>(std::istream& in, SVec2& vec);
+std::ostream& operator<<(std::ostream& out, SVec2char const& vec);
+std::ostream& operator<<(std::ostream& out, SVec2char const& vec);
 
 }
 }

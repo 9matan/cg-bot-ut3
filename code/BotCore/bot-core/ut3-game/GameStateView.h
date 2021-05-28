@@ -18,6 +18,7 @@ namespace game {
         char m_gameWinner;
         unsigned char m_xBlocksCnt;
         unsigned char m_oBlocksCnt;
+        unsigned char m_elementsCnt;
     };
 
 }

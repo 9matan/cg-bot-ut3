@@ -58,6 +58,7 @@ namespace game {
         auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);
         m_xBlocksCnt = (unsigned char)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0);
         m_oBlocksCnt = (unsigned char)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 1);
+        m_elementsCnt = (unsigned char)GAME_STATE_ELEMENTS_COUNT(state);
     }
 
     void SGameStateView::Print()
@@ -75,6 +76,7 @@ namespace game {
         std::cerr << "Game winner: " << m_gameWinner << "\n";
         std::cerr << "X blocks count: " << (int)m_xBlocksCnt << "\n";
         std::cerr << "O blocks count: " << (int)m_oBlocksCnt << "\n";
+        std::cerr << "Elements count: " << (int)m_elementsCnt << "\n";
     }
 
 }

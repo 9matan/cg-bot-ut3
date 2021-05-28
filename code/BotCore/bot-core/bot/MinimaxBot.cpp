@@ -30,8 +30,9 @@ namespace ut3
                 if (gameWinner != GAME_STATE_ELEMENT_EMPTY)
                 {
                     if (gameWinner == GAME_STATE_ELEMENT_DRAW) return 0.0f;
-                    if (gameWinner == GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(m_myPlayer)) return 10.0f;
-                    return -10.0f;
+                    float const depthScore = GAME_STATE_ELEMENTS_COUNT(state) * 0.01f;
+                    if (gameWinner == GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(m_myPlayer)) return 10.0f - depthScore;
+                    return -(10.0f - depthScore);
                 }
 
                 auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);
@@ -87,16 +88,15 @@ namespace ut3
     SOutputData CMinimaxBot::Update(SInputData turnData)
     {
         game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
+        game::SGameStateView(m_gameState).Print();
 
         using CUT3MinimaxAlgo = mimax::minimax::CMinimaxAlgorithmBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
 
-        CUT3MinimaxAlgo minimax(5, CUT3MinimaxResolver(m_myPlayer));
+        CUT3MinimaxAlgo minimax(7, CUT3MinimaxResolver(m_myPlayer));
         SVec2 turn1 = minimax.Solve(m_gameState);
 
 #if MIMAX_MINIMAX_DEBUG
-        auto const& debugInfo = minimax.GetDebugInfo();
-        std::cerr << "Visited nodes count: " << debugInfo.m_visitedNodesCnt << "\n";
-        std::cerr << "Evaluated nodes count: " << debugInfo.m_evaluatedNodesCnt << "\n";
+        minimax.GetDebugInfo().Print();
 #endif // MIMAX_MINIMAX_DEBUG
 
         game::MakeTurn(m_gameState, turn1[0], turn1[1]);

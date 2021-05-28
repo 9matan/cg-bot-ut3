@@ -46,13 +46,19 @@ namespace game {
     {
         for (int i = 0; i < WINNER_MASKS_COUNT; ++i)
         {
-            for (int playerIndex = 0; playerIndex < 2; ++playerIndex)
+            unsigned int const mask0 = GET_WINNER_MASK_FOR_PLAYER(WINNER_MASKS[i], 0);
+            unsigned int const mask1 = GET_WINNER_MASK_FOR_PLAYER(WINNER_MASKS[i], 1);
+            if ((mask0 & blockState.m_data) == mask0)
             {
-                unsigned int const mask = GET_WINNER_MASK_FOR_PLAYER(WINNER_MASKS[i], playerIndex);
-                if ((mask & blockState.m_data) == mask)
-                {
-                    return GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(playerIndex);
-                }
+                // to ignore draw elements
+                if (UT3_COUNT_BITS_32(mask1 & blockState.m_data) == 0)
+                    return GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(0);
+            }
+            else if ((mask1 & blockState.m_data) == mask1)
+            {
+                // to ignore draw elements
+                if (UT3_COUNT_BITS_32(mask0 & blockState.m_data) == 0)
+                    return GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(1);
             }
         }
 

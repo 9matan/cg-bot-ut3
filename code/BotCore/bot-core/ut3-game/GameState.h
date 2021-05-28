@@ -64,6 +64,7 @@ namespace game {
 
 #   define GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(blockState, playerIndex) ((int)UT3_COUNT_BITS_32((blockState).m_data & ut3::game::BLOCK_PLAYER_ELEMENTS_MASKS[(playerIndex)]) - (int)GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(blockState))
 #   define GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(blockState) UT3_COUNT_BITS_32(((blockState).m_data) & (((blockState).m_data & ut3::game::BLOCK_PLAYER_ELEMENTS_MASKS[1]) >> 1))
+#   define GAME_STATE_ELEMENTS_COUNT(gameState) (UT3_COUNT_BITS_64((gameState).m_data[0]) + UT3_COUNT_BITS_64((gameState).m_data[1] & UT3_FIRST_BITS_MASK(62)) + UT3_COUNT_BITS_64((gameState).m_data[2] & UT3_FIRST_BITS_MASK(36)))
 
     struct SGameState
     {
@@ -76,7 +77,6 @@ namespace game {
         //      00 - empty
         //      10 - X
         //      01 - O
-        //      11 - Draw
         //      0..63 bits from m_data[0]
         //      0..61 bits from m_data[1]
         //      0..35 bits from m_data[2]
@@ -110,7 +110,7 @@ namespace game {
         //      00 - empty
         //      10 - X
         //      01 - O
-        //      11 - Draw
+        //      11 - Draw - for global block
         unsigned int m_data = 0;
 
         inline bool operator==(SGameBlockState other) const { return m_data == other.m_data; }

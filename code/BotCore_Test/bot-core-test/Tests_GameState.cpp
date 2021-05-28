@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "bot-core/ut3-game/GameState.h"
+#include "bot-core/ut3-game/GameStateView.h"
 
 namespace ut3 {
 namespace game {
@@ -194,6 +195,25 @@ namespace game {
 
                 assert(GetBlockState(gameState, i) == blockState);
             }
+        }
+        {
+            SGameState gameState;
+            SGameBlockState blockState1;
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState1, 0, GAME_STATE_ELEMENT_X);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState1, 2, GAME_STATE_ELEMENT_O);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState1, 3, GAME_STATE_ELEMENT_O);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState1, 7, GAME_STATE_ELEMENT_X);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState1, 8, GAME_STATE_ELEMENT_X);
+            SGameBlockState blockState2;
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState2, 0, GAME_STATE_ELEMENT_O);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState2, 4, GAME_STATE_ELEMENT_X);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState2, 5, GAME_STATE_ELEMENT_X);
+            GAME_BLOCK_STATE_SET_ELEMENT(blockState2, 6, GAME_STATE_ELEMENT_O);
+
+            SetBlockState(gameState, 2, blockState1);
+            SetBlockState(gameState, 3, blockState2);
+
+            assert(GAME_STATE_ELEMENTS_COUNT(gameState) == 9);
         }
     }
 

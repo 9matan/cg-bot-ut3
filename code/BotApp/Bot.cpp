@@ -28,7 +28,7 @@ int main()
 	ut3::SInputData inData;
 
 	ReadData(inData);
-	ut3::CMinimaxBot bot(inData);
+	ut3::CMinimaxBot_v1 bot(inData);
 	WriteData(bot.FirstUpdate(inData));
 
 	while (true)

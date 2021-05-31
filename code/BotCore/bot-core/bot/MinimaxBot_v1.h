@@ -9,10 +9,12 @@
 
 namespace ut3
 {
-    class CMinimaxBot
+    class CMinimaxBot_v1
     {
     public:
-        CMinimaxBot(SInputData initData);
+        static SVec2 FindTurn(game::SGameState const& gameState, int const myPlayer);
+    public:
+        CMinimaxBot_v1(SInputData initData);
 
         SOutputData FirstUpdate(SInputData initData);
         SOutputData Update(SInputData turnData);

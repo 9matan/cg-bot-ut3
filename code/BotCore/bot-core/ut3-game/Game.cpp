@@ -39,7 +39,19 @@ namespace game {
 
     int CalculateWinner(SGameState const& gameState)
     {
-        return CalculateWinner(GAME_STATE_GET_GLOBAL_BLOCK(gameState));
+        auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(gameState);
+        int const blockWinner = CalculateWinner(globalBlock);
+
+        if (blockWinner == GAME_STATE_ELEMENT_DRAW)
+        {
+            int const xCnt = GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0);
+            int const oCnt = GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 1);
+            
+            if (xCnt == oCnt) return GAME_STATE_ELEMENT_DRAW;
+            return (xCnt > oCnt) ? GAME_STATE_ELEMENT_X : GAME_STATE_ELEMENT_O;
+        }
+
+        return blockWinner;
     }
 
     int CalculateWinner(SGameBlockState const blockState)

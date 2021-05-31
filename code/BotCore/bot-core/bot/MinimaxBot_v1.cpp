@@ -96,12 +96,12 @@ namespace ut3
     }
 
 
-    CMinimaxBot::CMinimaxBot(SInputData /*initData*/)
+    CMinimaxBot_v1::CMinimaxBot_v1(SInputData /*initData*/)
         : m_myPlayer(-1)
     {
     }
 
-    SOutputData CMinimaxBot::FirstUpdate(SInputData initData)
+    SOutputData CMinimaxBot_v1::FirstUpdate(SInputData initData)
     {
         int const randomSeed = mimax::common::UpdateRandomSeed();
         std::cerr << "Random seed: " << randomSeed << "\n";
@@ -121,31 +121,40 @@ namespace ut3
         }
     }
 
-    SOutputData CMinimaxBot::Update(SInputData turnData)
+    SOutputData CMinimaxBot_v1::Update(SInputData turnData)
     {
-        auto const startTime = std::chrono::high_resolution_clock::now();
-        auto const endTime = startTime + 95ms;
         game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
         game::SGameStateView(m_gameState).Print();
 
-        auto globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(m_gameState);
+        auto const turn = FindTurn(m_gameState, m_myPlayer);
+
+        game::MakeTurn(m_gameState, turn[0], turn[1]);
+        return { turn[0], turn[1] };
+    }
+
+    SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPlayer)
+    {
+        auto const startTime = std::chrono::high_resolution_clock::now();
+        auto const endTime = startTime + 95ms;
+
+        auto globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(gameState);
         size_t const playedBlocksCount =
             GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0)
             + GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 1)
             + GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(globalBlock);
         float const minScoreValue = (playedBlocksCount >= 6 ? (-1.0f) : (-2.0f));
 
-        int const gameStage = (GAME_STATE_ELEMENTS_COUNT(m_gameState) >= 40) ? 1 : 0;
+        int const gameStage = (GAME_STATE_ELEMENTS_COUNT(gameState) >= 40) ? 1 : 0;
         int const hardwareConcurrency = std::thread::hardware_concurrency();
-        int constexpr threadsCountMax = 6;
+        int constexpr threadsCountMax =  6;
         int const threadsCount = (hardwareConcurrency >= 8) ? threadsCountMax : 4;
         CMinimaxThread threads[threadsCountMax] = {
-            CMinimaxThread(m_gameState, 6, m_myPlayer, minScoreValue),
-            CMinimaxThread(m_gameState, 7, m_myPlayer, minScoreValue),
-            CMinimaxThread(m_gameState, 8, m_myPlayer, minScoreValue),
-            CMinimaxThread(m_gameState, 9, m_myPlayer, minScoreValue),
-            CMinimaxThread(m_gameState, (hardwareConcurrency >= 8) ? (10 + gameStage) : 1, m_myPlayer, minScoreValue),
-            CMinimaxThread(m_gameState, (hardwareConcurrency >= 8) ? (11 + 2 * gameStage) : 1, m_myPlayer, minScoreValue)
+            CMinimaxThread(gameState, 6, myPlayer, minScoreValue)
+            , CMinimaxThread(gameState, 7, myPlayer, minScoreValue)
+            , CMinimaxThread(gameState, 8, myPlayer, minScoreValue)
+            , CMinimaxThread(gameState, 9, myPlayer, minScoreValue)
+            , CMinimaxThread(gameState, (hardwareConcurrency >= 8) ? (10 + gameStage) : 1, myPlayer, minScoreValue)
+            , CMinimaxThread(gameState, (hardwareConcurrency >= 8) ? (11 + 2 * gameStage) : 1, myPlayer, minScoreValue)
         };
 
         while (std::chrono::high_resolution_clock::now() < endTime)
@@ -153,8 +162,8 @@ namespace ut3
             std::this_thread::yield();
         }
         std::cerr << "Stopping threads ... \n";
-        
-        for(auto& thread: threads)
+
+        for (auto& thread : threads)
         {
             thread.Stop();
         }
@@ -181,11 +190,10 @@ namespace ut3
         {
             std::cerr << "[ERROR] Could not find a next turn using minimax!\n";
             game::Turns turns;
-            game::CollectPossibleTurns(m_gameState, turns);
+            game::CollectPossibleTurns(gameState, turns);
             turn = *mimax::common::GetRandomItem(turns.begin(), turns.end());
         }
 
-        game::MakeTurn(m_gameState, turn[0], turn[1]);
-        return { turn[0], turn[1] };
+        return turn;
     }
 }

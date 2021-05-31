@@ -20,6 +20,10 @@ namespace mimax {namespace common {class CTimeProfiler{public:CTimeProfiler(char
 #define PROFILE_TIME(name)
 #endif 
 
+
+#include <algorithm>
+#include <assert.h>
+namespace mimax {namespace common {template<typename TComponent>struct SVec2Base{static const size_t ms_vecSize = 2;using ValueType = TComponent;template<typename TOtherComponent>explicit SVec2Base(SVec2Base<TOtherComponent> const other): m_components{ static_cast<TComponent>(other[0]), static_cast<TComponent>(other[1]) }{}template<typename TOtherComponent>SVec2Base(TOtherComponent const x, TOtherComponent const y): m_components{ static_cast<TComponent>(x), static_cast<TComponent>(y) }{}template<typename TOtherComponent>SVec2Base(std::initializer_list<TOtherComponent> const& data){assert(data.size() <= ms_vecSize);std::transform(data.begin(), data.end(), m_data,[](TOtherComponent const otherComp){return static_cast<TComponent>(otherComp);});}SVec2Base() : m_components{0, 0} {}SVec2Base(TComponent const x, TComponent const y) : m_components{x, y} {}SVec2Base(std::initializer_list<TComponent> const& data){assert(data.size() <= ms_vecSize);std::copy(data.begin(), data.end(), m_data);}inline SVec2Base& operator=(SVec2Base const other) { m_data[0] = other.m_data[0]; m_data[1] = other.m_data[1]; return *this; }inline bool operator==(SVec2Base const other) const { return other[0] == m_data[0] && other[1] == m_data[1]; }inline bool operator!=(SVec2Base const other) const { return !(*this == other); }inline TComponent operator[](size_t const index) const { return m_data[index]; }inline TComponent& operator[](size_t const index) { return m_data[index]; }inline SVec2Base operator+(SVec2Base const other) const { return SVec2Base(m_data[0] + other.m_data[0], m_data[1] + other.m_data[1]); }inline SVec2Base operator-(SVec2Base const other) const { return SVec2Base(m_data[0] - other.m_data[0], m_data[1] - other.m_data[1]); }inline bool operator<(SVec2Base const other) const { if (m_data[0] == other[0]) { return m_data[1] < other[1]; } return m_data[0] < other[0]; }union{struct{TComponent m_x;TComponent m_y;} m_components;TComponent m_data[ms_vecSize];};};using SVec2i = SVec2Base<int>;using SVec2u = SVec2Base<unsigned int>;using SVec2si = SVec2Base<short>;using SVec2su = SVec2Base<unsigned short>;using SVec2char = mimax::common::SVec2Base<char>;}}using SVec2 = mimax::common::SVec2char;
 namespace ut3{struct SInputData{int m_oppTurnY;int m_oppTurnX;};};
 namespace ut3{struct SOutputData{int m_turnX;int m_turnY;};};
 
@@ -87,10 +91,7 @@ void ReadData(ut3::SInputData& inputData){std::cin >> inputData.m_oppTurnY >> in
 #define _CRT_SECURE_NO_WARNINGS
 
 #define MIMAX_MINIMAX_DEBUG (1)
-
-#include <algorithm>
 #include <array>
-#include <assert.h>
 #include <cstring>
 #include <functional>
 #include <queue>
@@ -99,7 +100,6 @@ void ReadData(ut3::SInputData& inputData){std::cin >> inputData.m_oppTurnY >> in
 #include <vector>
 
 namespace mimax {namespace common {unsigned int UpdateRandomSeed();unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal);template<typename TIter>inline TIter GetRandomItem(TIter first, TIter last){size_t const rangeSize = static_cast<size_t>(last - first);return first + GetRandomUInt32(0, static_cast<unsigned int>(rangeSize));}template<typename TEnum>inline TEnum GetRandomEnumValue(){return static_cast<TEnum>(GetRandomUInt32(0, static_cast<unsigned int>(TEnum::Count)));}template<typename TIter>inline void RandomShuffle(TIter first, TIter last){if (first == last) return;TIter current = last;--current;for (; current != first; --current){std::swap(*current, *(first + GetRandomUInt32(0, (unsigned int)(current - first + 1))));}}}}
-namespace mimax {namespace common {template<typename TComponent>struct SVec2Base{static const size_t ms_vecSize = 2;using ValueType = TComponent;template<typename TOtherComponent>explicit SVec2Base(SVec2Base<TOtherComponent> const other): m_components{ static_cast<TComponent>(other[0]), static_cast<TComponent>(other[1]) }{}template<typename TOtherComponent>SVec2Base(TOtherComponent const x, TOtherComponent const y): m_components{ static_cast<TComponent>(x), static_cast<TComponent>(y) }{}template<typename TOtherComponent>SVec2Base(std::initializer_list<TOtherComponent> const& data){assert(data.size() <= ms_vecSize);std::transform(data.begin(), data.end(), m_data,[](TOtherComponent const otherComp){return static_cast<TComponent>(otherComp);});}SVec2Base() : m_components{0, 0} {}SVec2Base(TComponent const x, TComponent const y) : m_components{x, y} {}SVec2Base(std::initializer_list<TComponent> const& data){assert(data.size() <= ms_vecSize);std::copy(data.begin(), data.end(), m_data);}inline SVec2Base& operator=(SVec2Base const other) { m_data[0] = other.m_data[0]; m_data[1] = other.m_data[1]; return *this; }inline bool operator==(SVec2Base const other) const { return other[0] == m_data[0] && other[1] == m_data[1]; }inline bool operator!=(SVec2Base const other) const { return !(*this == other); }inline TComponent operator[](size_t const index) const { return m_data[index]; }inline TComponent& operator[](size_t const index) { return m_data[index]; }inline SVec2Base operator+(SVec2Base const other) const { return SVec2Base(m_data[0] + other.m_data[0], m_data[1] + other.m_data[1]); }inline SVec2Base operator-(SVec2Base const other) const { return SVec2Base(m_data[0] - other.m_data[0], m_data[1] - other.m_data[1]); }inline bool operator<(SVec2Base const other) const { if (m_data[0] == other[0]) { return m_data[1] < other[1]; } return m_data[0] < other[0]; }union{struct{TComponent m_x;TComponent m_y;} m_components;TComponent m_data[ms_vecSize];};};using SVec2i = SVec2Base<int>;using SVec2u = SVec2Base<unsigned int>;using SVec2si = SVec2Base<short>;using SVec2su = SVec2Base<unsigned short>;using SVec2char = mimax::common::SVec2Base<char>;}}using SVec2 = mimax::common::SVec2char;
 
 #include <istream>
 #include <ostream>
@@ -108,6 +108,7 @@ namespace mimax {namespace common {template <typename TVec>inline int GetDistanc
 #include <limits>
 
 #define MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING (1)
+#define MIMAX_MINIMAX_ENABLE_INTERRUPTION (1)
 namespace mimax {namespace minimax {template<typename TState, typename TMove, typename TMovesContainer, typename TResolver>class CMinimaxAlgorithmBase{
 #if MIMAX_MINIMAX_DEBUG
 public:struct SDebugInfo{unsigned int m_evaluatedNodesCnt;unsigned int m_visitedNodesCnt;
@@ -132,11 +133,14 @@ public:CMinimaxAlgorithmBase(unsigned int const maxDepth, TResolver const& resol
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
 , m_minValue(-std::numeric_limits<float>::max()), m_maxValue(std::numeric_limits<float>::max())
 #endif 
-{}
+{assert(maxDepth > 0);}
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
-CMinimaxAlgorithmBase(unsigned int const maxDepth, TResolver const& resolver, float const minValue, float const maxValue): m_maxDepth(maxDepth), m_resolver(resolver), m_minValue(minValue), m_maxValue(maxValue){}
+CMinimaxAlgorithmBase(unsigned int const maxDepth, TResolver const& resolver, float const minValue, float const maxValue): m_maxDepth(maxDepth), m_resolver(resolver), m_minValue(minValue), m_maxValue(maxValue){assert(maxDepth > 0);}
 #endif 
 inline TMove Solve(TState const& state){
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+m_interrupt = false;
+#endif 
 #if MIMAX_MINIMAX_DEBUG
 m_debugInfo.Reset();
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
@@ -152,12 +156,19 @@ return VisitState(state, 0).m_move;
 #if MIMAX_MINIMAX_DEBUG
 inline SDebugInfo const& GetDebugInfo() const { return m_debugInfo; }
 #endif 
+
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+inline void Interrupt() { m_interrupt = true; }inline bool IsInterrupted() const { return m_interrupt; }
+#endif 
 private:struct STraversalResult{float m_score = 0.0f;TMove m_move;};private:TResolver m_resolver;unsigned int m_maxDepth;
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
 float m_minValue;float m_maxValue;
 #endif 
 #if MIMAX_MINIMAX_DEBUG
 SDebugInfo m_debugInfo;
+#endif 
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+bool m_interrupt;
 #endif 
 private:
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
@@ -177,7 +188,11 @@ int const colorMultiplier = (depth & 1) == 0 ? 1 : -1;result.m_score = m_resolve
 #if MIMAX_MINIMAX_DEBUG
 unsigned int visitedChildrenCount = 0;
 #endif 
-for(auto const move: moves){TState childState = state;m_resolver.MakeMove(childState, move);
+for(auto const move: moves){
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+if (m_interrupt) return result;
+#endif 
+TState childState = state;m_resolver.MakeMove(childState, move);
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
 auto const childResult = VisitState(childState, depth + 1, -beta, -alpha);
 #else
@@ -199,11 +214,15 @@ namespace mimax {namespace common {template<typename T, size_t TSize>class CStat
 namespace ut3 {namespace game {using Turns = mimax::common::CStaticVector<SVec2, 9 * 9>;int CalculateWinner(SGameState const& gameState);int CalculateWinner(SGameBlockState const blockState);void MakeTurn(SGameState& gameState, int const worldX, int const worldY);void CollectPossibleTurns(SGameState const& gameState, Turns& turnsOut);}}
 namespace ut3 {namespace game {struct SGameStateView{SGameStateView(SGameState const& state);void Print();char m_map[9][10];char m_globalBlockStatuses[3][4];char m_player;char m_oppLastTurnX;char m_oppLastTurnY;char m_gameWinner;unsigned char m_xBlocksCnt;unsigned char m_oBlocksCnt;unsigned char m_elementsCnt;};}}
 #include <thread>
-using namespace std::chrono_literals;namespace ut3{namespace{class CUT3MinimaxResolver{public:CUT3MinimaxResolver(int const myPlayer): m_myPlayer(myPlayer){}float EvaluateState(game::SGameState const& state){int const gameWinner = GAME_STATE_GET_GAME_WINNER(state);if (gameWinner != GAME_STATE_ELEMENT_EMPTY){if (gameWinner == GAME_STATE_ELEMENT_DRAW) return 0.0f;float const depthScore = GAME_STATE_ELEMENTS_COUNT(state) * 0.01f;if (gameWinner == GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(m_myPlayer)) return 10.0f - depthScore;return -(10.0f - depthScore);}auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);int const oppPlayer = ((m_myPlayer + 1) & 1);int const myBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, m_myPlayer);int const oppBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, oppPlayer);return (float)(myBlocksCnt - oppBlocksCnt);}void GetPossibleMoves(game::Turns& turnsOut, game::SGameState const& state){game::CollectPossibleTurns(state, turnsOut);mimax::common::RandomShuffle(turnsOut.begin(), turnsOut.end());}void MakeMove(game::SGameState& state, SVec2 move){game::MakeTurn(state, move[0], move[1]);}private:int m_myPlayer;};}CMinimaxBot::CMinimaxBot(SInputData /*initData*/): m_myPlayer(-1){}SOutputData CMinimaxBot::FirstUpdate(SInputData initData){int const randomSeed = mimax::common::UpdateRandomSeed();std::cerr << "Random seed: " << randomSeed << "\n";if (initData.m_oppTurnX >= 0){m_myPlayer = 1;return Update(initData);}else{m_myPlayer = 0;SOutputData output{ 4, 4 };game::MakeTurn(m_gameState, output.m_turnX, output.m_turnY);return output;}}SOutputData CMinimaxBot::Update(SInputData turnData){game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);game::SGameStateView(m_gameState).Print();using CUT3MinimaxAlgo = mimax::minimax::CMinimaxAlgorithmBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;CUT3MinimaxAlgo minimax(7, CUT3MinimaxResolver(m_myPlayer));SVec2 turn1 = minimax.Solve(m_gameState);
+using namespace std::chrono_literals;namespace ut3{namespace{class CUT3MinimaxResolver{public:CUT3MinimaxResolver(int const myPlayer): m_myPlayer(myPlayer){}float EvaluateState(game::SGameState const& state){int const gameWinner = GAME_STATE_GET_GAME_WINNER(state);if (gameWinner != GAME_STATE_ELEMENT_EMPTY){if (gameWinner == GAME_STATE_ELEMENT_DRAW) return 0.0f;float const depthScore = GAME_STATE_ELEMENTS_COUNT(state) * 0.01f;if (gameWinner == GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(m_myPlayer)) return 10.0f - depthScore;return -(10.0f - depthScore);}auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);int const oppPlayer = ((m_myPlayer + 1) & 1);int const myBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, m_myPlayer);int const oppBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, oppPlayer);return (float)(myBlocksCnt - oppBlocksCnt);}void GetPossibleMoves(game::Turns& turnsOut, game::SGameState const& state){game::CollectPossibleTurns(state, turnsOut);mimax::common::RandomShuffle(turnsOut.begin(), turnsOut.end());}void MakeMove(game::SGameState& state, SVec2 move){game::MakeTurn(state, move[0], move[1]);}private:int m_myPlayer;};using CUT3MinimaxAlgo = mimax::minimax::CMinimaxAlgorithmBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;class CMinimaxThread{public:CMinimaxThread(game::SGameState const& gameState, unsigned int const depth, int const myPlayer, float const minValue): m_minimaxAlgo(depth, CUT3MinimaxResolver(myPlayer), minValue, 10.0f), m_isFinished(false), m_turn(-1, -1), m_thread([this, gameState](){SVec2 foundTurn = m_minimaxAlgo.Solve(gameState);if (!m_minimaxAlgo.IsInterrupted())m_turn = foundTurn;m_isFinished = true;}){}inline void Stop() { if(!m_isFinished) m_minimaxAlgo.Interrupt(); }inline void Join() { m_thread.join(); }inline SVec2 GetTurn() const { return m_turn; }
 #if MIMAX_MINIMAX_DEBUG
-minimax.GetDebugInfo().Print();
+inline CUT3MinimaxAlgo::SDebugInfo const& GetDebugInfo() const { return m_minimaxAlgo.GetDebugInfo(); }
 #endif 
-game::MakeTurn(m_gameState, turn1[0], turn1[1]);return { turn1[0], turn1[1] };}}
+private:std::thread m_thread;CUT3MinimaxAlgo m_minimaxAlgo;SVec2 m_turn;bool m_isFinished;};}CMinimaxBot::CMinimaxBot(SInputData /*initData*/): m_myPlayer(-1){}SOutputData CMinimaxBot::FirstUpdate(SInputData initData){int const randomSeed = mimax::common::UpdateRandomSeed();std::cerr << "Random seed: " << randomSeed << "\n";std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";if (initData.m_oppTurnX >= 0){m_myPlayer = 1;return Update(initData);}else{m_myPlayer = 0;SOutputData output{ 4, 4 };game::MakeTurn(m_gameState, output.m_turnX, output.m_turnY);return output;}}SOutputData CMinimaxBot::Update(SInputData turnData){auto const startTime = std::chrono::high_resolution_clock::now();auto const endTime = startTime + 95ms;game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);game::SGameStateView(m_gameState).Print();auto globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(m_gameState);size_t const playedBlocksCount =GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0)+ GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 1)+ GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(globalBlock);float const minScoreValue = (playedBlocksCount >= 6 ? (-1.0f) : (-2.0f));int const gameStage = (GAME_STATE_ELEMENTS_COUNT(m_gameState) >= 40) ? 1 : 0;int const hardwareConcurrency = std::thread::hardware_concurrency();int constexpr threadsCountMax = 6;int const threadsCount = (hardwareConcurrency >= 8) ? threadsCountMax : 4;CMinimaxThread threads[threadsCountMax] = {CMinimaxThread(m_gameState, 6, m_myPlayer, minScoreValue),CMinimaxThread(m_gameState, 7, m_myPlayer, minScoreValue),CMinimaxThread(m_gameState, 8, m_myPlayer, minScoreValue),CMinimaxThread(m_gameState, 9, m_myPlayer, minScoreValue),CMinimaxThread(m_gameState, (hardwareConcurrency >= 8) ? (10 + gameStage) : 1, m_myPlayer, minScoreValue),CMinimaxThread(m_gameState, (hardwareConcurrency >= 8) ? (11 + 2 * gameStage) : 1, m_myPlayer, minScoreValue)};while (std::chrono::high_resolution_clock::now() < endTime){std::this_thread::yield();}std::cerr << "Stopping threads ... \n";for(auto& thread: threads){thread.Stop();}for (auto& thread : threads){thread.Join();}SVec2 turn = { -1, -1 };for (int i = threadsCount - 1; i >= 0; --i){if (threads[i].GetTurn()[0] != -1){turn = threads[i].GetTurn();
+#if MIMAX_MINIMAX_DEBUG
+threads[i].GetDebugInfo().Print();
+#endif 
+break;}}if (turn[0] == -1){std::cerr << "[ERROR] Could not find a next turn using minimax!\n";game::Turns turns;game::CollectPossibleTurns(m_gameState, turns);turn = *mimax::common::GetRandomItem(turns.begin(), turns.end());}game::MakeTurn(m_gameState, turn[0], turn[1]);return { turn[0], turn[1] };}}
 namespace ut3 {namespace game {inline char ConvertGameStateElemToChar(int const elem){if (elem == GAME_STATE_ELEMENT_EMPTY) return '-';else if (elem == GAME_STATE_ELEMENT_X) return 'X';else if (elem == GAME_STATE_ELEMENT_O) return 'O';return 'D';}SGameStateView::SGameStateView(SGameState const& state){for (int blockX = 0; blockX < 3; ++blockX){for (int blockY = 0; blockY < 3; ++blockY){int const blockIndex = GAME_BLOCK_STATE_POS_TO_INDEX(blockX, blockY);m_globalBlockStatuses[blockY][blockX] = ConvertGameStateElemToChar(GAME_STATE_GET_BLOCK_STATUS(state, blockIndex));auto const block = GetBlockState(state, blockIndex);for (int x = 0; x < 3; ++x){for (int y = 0; y < 3; ++y){m_map[y + blockY * 3][x + blockX * 3] = ConvertGameStateElemToChar(GAME_BLOCK_STATE_GET_ELEMENT_BY_POS(block, x, y));}}}}for (int r = 0; r < 3; ++r){m_globalBlockStatuses[r][3] = '\0';}for (int r = 0; r < 9; ++r){m_map[r][9] = '\0';}m_player = ConvertGameStateElemToChar(GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(GAME_STATE_GET_PLAYER(state)));m_oppLastTurnX = GAME_STATE_GET_LAST_OPP_TURN_X(state);m_oppLastTurnY = GAME_STATE_GET_LAST_OPP_TURN_Y(state);m_gameWinner = ConvertGameStateElemToChar(GAME_STATE_GET_GAME_WINNER(state));auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);m_xBlocksCnt = (unsigned char)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0);m_oBlocksCnt = (unsigned char)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 1);m_elementsCnt = (unsigned char)GAME_STATE_ELEMENTS_COUNT(state);}void SGameStateView::Print(){for (int r = 0; r < 9; ++r){std::cerr << m_map[r] << "\n";}for (int r = 0; r < 3; ++r){std::cerr << m_globalBlockStatuses[r] << "\n";}std::cerr << "Player: " << m_player << "\n";std::cerr << "Opp last turn: " << (int)m_oppLastTurnY << ", " << (int)m_oppLastTurnX << "\n";std::cerr << "Game winner: " << m_gameWinner << "\n";std::cerr << "X blocks count: " << (int)m_xBlocksCnt << "\n";std::cerr << "O blocks count: " << (int)m_oBlocksCnt << "\n";std::cerr << "Elements count: " << (int)m_elementsCnt << "\n";}}}
 namespace{constexpr size_t WINNER_MASKS_COUNT = 8;constexpr unsigned int WINNER_MASKS[WINNER_MASKS_COUNT] = {21, 1344, 86016, 4161, 16644, 66576, 65793, 4368};
 #   define GET_WINNER_MASK_FOR_PLAYER(mask, playerIndex) ((mask) << (playerIndex))

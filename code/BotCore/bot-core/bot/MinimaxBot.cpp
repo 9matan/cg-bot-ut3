@@ -59,7 +59,42 @@ namespace ut3
         private:
             int m_myPlayer;
         };
+
+        using CUT3MinimaxAlgo = mimax::minimax::CMinimaxAlgorithmBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
+
+        class CMinimaxThread
+        {
+        public:
+            CMinimaxThread(game::SGameState const& gameState, unsigned int const depth, int const myPlayer, float const minValue)
+                : m_minimaxAlgo(depth, CUT3MinimaxResolver(myPlayer), minValue, 10.0f)
+                , m_isFinished(false)
+                , m_turn(-1, -1)
+                , m_thread([this, gameState]()
+                    {
+                        SVec2 foundTurn = m_minimaxAlgo.Solve(gameState);
+                        if (!m_minimaxAlgo.IsInterrupted())
+                            m_turn = foundTurn;
+                        m_isFinished = true;
+                    }
+                )
+            {
+            }
+            
+            inline void Stop() { if(!m_isFinished) m_minimaxAlgo.Interrupt(); }
+            inline void Join() { m_thread.join(); }
+            inline SVec2 GetTurn() const { return m_turn; }
+#if MIMAX_MINIMAX_DEBUG
+            inline CUT3MinimaxAlgo::SDebugInfo const& GetDebugInfo() const { return m_minimaxAlgo.GetDebugInfo(); }
+#endif // MIMAX_MINIMAX_DEBUG
+
+        private:
+            std::thread m_thread;
+            CUT3MinimaxAlgo m_minimaxAlgo;
+            SVec2 m_turn;
+            bool m_isFinished;
+        };
     }
+
 
     CMinimaxBot::CMinimaxBot(SInputData /*initData*/)
         : m_myPlayer(-1)
@@ -70,6 +105,7 @@ namespace ut3
     {
         int const randomSeed = mimax::common::UpdateRandomSeed();
         std::cerr << "Random seed: " << randomSeed << "\n";
+        std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";
 
         if (initData.m_oppTurnX >= 0)
         {
@@ -87,19 +123,69 @@ namespace ut3
 
     SOutputData CMinimaxBot::Update(SInputData turnData)
     {
+        auto const startTime = std::chrono::high_resolution_clock::now();
+        auto const endTime = startTime + 95ms;
         game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
         game::SGameStateView(m_gameState).Print();
 
-        using CUT3MinimaxAlgo = mimax::minimax::CMinimaxAlgorithmBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
+        auto globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(m_gameState);
+        size_t const playedBlocksCount =
+            GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0)
+            + GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 1)
+            + GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(globalBlock);
+        float const minScoreValue = (playedBlocksCount >= 6 ? (-1.0f) : (-2.0f));
 
-        CUT3MinimaxAlgo minimax(7, CUT3MinimaxResolver(m_myPlayer));
-        SVec2 turn1 = minimax.Solve(m_gameState);
+        int const gameStage = (GAME_STATE_ELEMENTS_COUNT(m_gameState) >= 40) ? 1 : 0;
+        int const hardwareConcurrency = std::thread::hardware_concurrency();
+        int constexpr threadsCountMax = 6;
+        int const threadsCount = (hardwareConcurrency >= 8) ? threadsCountMax : 4;
+        CMinimaxThread threads[threadsCountMax] = {
+            CMinimaxThread(m_gameState, 6, m_myPlayer, minScoreValue),
+            CMinimaxThread(m_gameState, 7, m_myPlayer, minScoreValue),
+            CMinimaxThread(m_gameState, 8, m_myPlayer, minScoreValue),
+            CMinimaxThread(m_gameState, 9, m_myPlayer, minScoreValue),
+            CMinimaxThread(m_gameState, (hardwareConcurrency >= 8) ? (10 + gameStage) : 1, m_myPlayer, minScoreValue),
+            CMinimaxThread(m_gameState, (hardwareConcurrency >= 8) ? (11 + 2 * gameStage) : 1, m_myPlayer, minScoreValue)
+        };
 
+        while (std::chrono::high_resolution_clock::now() < endTime)
+        {
+            std::this_thread::yield();
+        }
+        std::cerr << "Stopping threads ... \n";
+        
+        for(auto& thread: threads)
+        {
+            thread.Stop();
+        }
+
+        for (auto& thread : threads)
+        {
+            thread.Join();
+        }
+
+        SVec2 turn = { -1, -1 };
+        for (int i = threadsCount - 1; i >= 0; --i)
+        {
+            if (threads[i].GetTurn()[0] != -1)
+            {
+                turn = threads[i].GetTurn();
 #if MIMAX_MINIMAX_DEBUG
-        minimax.GetDebugInfo().Print();
+                threads[i].GetDebugInfo().Print();
 #endif // MIMAX_MINIMAX_DEBUG
+                break;
+            }
+        }
 
-        game::MakeTurn(m_gameState, turn1[0], turn1[1]);
-        return { turn1[0], turn1[1] };
+        if (turn[0] == -1)
+        {
+            std::cerr << "[ERROR] Could not find a next turn using minimax!\n";
+            game::Turns turns;
+            game::CollectPossibleTurns(m_gameState, turns);
+            turn = *mimax::common::GetRandomItem(turns.begin(), turns.end());
+        }
+
+        game::MakeTurn(m_gameState, turn[0], turn[1]);
+        return { turn[0], turn[1] };
     }
 }

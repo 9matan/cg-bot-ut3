@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mimax/common/Vec2.h"
+
 #include "bot-core/InputData.h"
 #include "bot-core/OutputData.h"
 

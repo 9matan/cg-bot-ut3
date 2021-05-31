@@ -2,8 +2,11 @@
 
 #include <limits>
 
-// Define MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING (1) to enabled pruning
+// Define MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING (1) to enable pruning
+// Define MIMAX_MINIMAX_DEBUG (1) to collect debug info
+// Define MIMAX_MINIMAX_ENABLE_INTERRUPTION (1) to enable stopping of the algorithm
 #define MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING (1)
+#define MIMAX_MINIMAX_ENABLE_INTERRUPTION (1)
 
 namespace mimax {
 namespace minimax {
@@ -72,7 +75,7 @@ public:
         , m_minValue(-std::numeric_limits<float>::max())
         , m_maxValue(std::numeric_limits<float>::max())
 #endif // MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
-    {}
+    {assert(maxDepth > 0);}
 
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
     CMinimaxAlgorithmBase(unsigned int const maxDepth, TResolver const& resolver, float const minValue, float const maxValue)
@@ -80,11 +83,14 @@ public:
         , m_resolver(resolver)
         , m_minValue(minValue)
         , m_maxValue(maxValue)
-    {}
+    {assert(maxDepth > 0);}
 #endif // MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
 
     inline TMove Solve(TState const& state)
     {
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+        m_interrupt = false;
+#endif // MIMAX_MINIMAX_ENABLE_INTERRUPTION
 #if MIMAX_MINIMAX_DEBUG
         m_debugInfo.Reset();
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
@@ -101,6 +107,11 @@ public:
 #if MIMAX_MINIMAX_DEBUG
     inline SDebugInfo const& GetDebugInfo() const { return m_debugInfo; }
 #endif // MIMAX_MINIMAX_DEBUG
+
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+    inline void Interrupt() { m_interrupt = true; }
+    inline bool IsInterrupted() const { return m_interrupt; }
+#endif // MIMAX_MINIMAX_ENABLE_INTERRUPTION
 
 private:
     struct STraversalResult
@@ -119,6 +130,9 @@ private:
 #if MIMAX_MINIMAX_DEBUG
     SDebugInfo m_debugInfo;
 #endif // MIMAX_MINIMAX_DEBUG
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+    bool m_interrupt;
+#endif // MIMAX_MINIMAX_ENABLE_INTERRUPTION
 
 private:
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
@@ -153,6 +167,10 @@ private:
 #endif // MIMAX_MINIMAX_DEBUG
         for(auto const move: moves)
         {
+#if MIMAX_MINIMAX_ENABLE_INTERRUPTION
+            if (m_interrupt) return result;
+#endif // MIMAX_MINIMAX_ENABLE_INTERRUPTION
+
             TState childState = state;
             m_resolver.MakeMove(childState, move);
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING

@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "mimax/common/Profiler.h"
-#include "bot-core/bot/MinimaxBot.h"
+#include "bot-core/bot/MinimaxBot_v1.h"
 
 void ReadData(ut3::SInputData& inputData)
 {

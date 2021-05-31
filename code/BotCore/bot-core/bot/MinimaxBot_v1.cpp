@@ -1,5 +1,5 @@
 #include "BotCore_PCH.h"
-#include "bot-core/bot/MinimaxBot.h"
+#include "bot-core/bot/MinimaxBot_v1.h"
 
 #include <chrono>
 #include <thread>

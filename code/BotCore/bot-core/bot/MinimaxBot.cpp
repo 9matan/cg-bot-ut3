@@ -71,7 +71,7 @@ namespace ut3
                 , m_turn(-1, -1)
                 , m_thread([this, gameState]()
                     {
-                        SVec2 foundTurn = m_minimaxAlgo.Solve(gameState);
+                        SVec2 foundTurn = m_minimaxAlgo.Solve(gameState).m_move;
                         if (!m_minimaxAlgo.IsInterrupted())
                             m_turn = foundTurn;
                         m_isFinished = true;

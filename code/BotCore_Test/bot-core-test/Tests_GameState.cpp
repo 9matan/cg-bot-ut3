@@ -1,7 +1,6 @@
 #include <cassert>
 
 #include "bot-core/ut3-game/GameState.h"
-#include "bot-core/ut3-game/GameStateView.h"
 
 namespace ut3 {
 namespace game {

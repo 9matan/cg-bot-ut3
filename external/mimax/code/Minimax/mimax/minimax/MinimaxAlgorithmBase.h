@@ -68,6 +68,13 @@ public:
 #endif // MIMAX_MINIMAX_DEBUG
 
 public:
+    struct STraversalResult
+    {
+        float m_score = 0.0f;
+        TMove m_move;
+    };
+
+public:
     CMinimaxAlgorithmBase(unsigned int const maxDepth, TResolver const& resolver)
         : m_maxDepth(maxDepth)
         , m_resolver(resolver)
@@ -86,7 +93,7 @@ public:
     {assert(maxDepth > 0);}
 #endif // MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
 
-    inline TMove Solve(TState const& state)
+    inline STraversalResult Solve(TState const& state)
     {
 #if MIMAX_MINIMAX_ENABLE_INTERRUPTION
         m_interrupt = false;
@@ -98,9 +105,9 @@ public:
 #endif // MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
 #endif // MIMAX_MINIMAX_DEBUG
 #if MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
-        return VisitState(state, 0, m_minValue, m_maxValue).m_move;
+        return VisitState(state, 0, m_minValue, m_maxValue);
 #else
-        return VisitState(state, 0).m_move;
+        return VisitState(state, 0);
 #endif // MIMAX_MINIMAX_ENABLE_ALPHA_BETA_PRUNING
     }
 
@@ -112,13 +119,6 @@ public:
     inline void Interrupt() { m_interrupt = true; }
     inline bool IsInterrupted() const { return m_interrupt; }
 #endif // MIMAX_MINIMAX_ENABLE_INTERRUPTION
-
-private:
-    struct STraversalResult
-    {
-        float m_score = 0.0f;
-        TMove m_move; 
-    };
 
 private:
     TResolver m_resolver;

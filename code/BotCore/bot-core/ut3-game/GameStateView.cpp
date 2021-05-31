@@ -1,17 +1,10 @@
 #include "BotCore_PCH.h"
 
+#include "bot-core/ut3-game/GameStateHelper.h"
 #include "bot-core/ut3-game/GameStateView.h"
 
 namespace ut3 {
 namespace game {
-
-    inline char ConvertGameStateElemToChar(int const elem)
-    {
-        if (elem == GAME_STATE_ELEMENT_EMPTY) return '-';
-        else if (elem == GAME_STATE_ELEMENT_X) return 'X';
-        else if (elem == GAME_STATE_ELEMENT_O) return 'O';
-        return 'D';
-    }
 
     SGameStateView::SGameStateView(SGameState const& state)
     {

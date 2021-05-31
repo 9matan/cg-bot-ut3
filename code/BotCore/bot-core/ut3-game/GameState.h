@@ -5,7 +5,7 @@
 
 namespace ut3 {
 namespace game {
-#   define UT3_FIRST_BITS_MASK(bitsCount)  ((~(1ULL)) >> (64 - bitsCount)) //((1ULL << (bitsCount)) - 1)
+#   define UT3_FIRST_BITS_MASK(bitsCount)  ((~(1ULL)) >> (64 - bitsCount))
 
 #   define UT3_SET_BIT(number, bitPos, bitVal) number = ((number & (~(1ULL << (bitPos)))) | ((unsigned long long)((bitVal) == 0 ? 0 : 1) << (bitPos)))
 #   define UT3_GET_BIT(number, bitPos) (((number) >> (bitPos)) & 1)

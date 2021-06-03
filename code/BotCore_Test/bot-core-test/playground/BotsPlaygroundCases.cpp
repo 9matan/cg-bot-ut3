@@ -1,4 +1,7 @@
+#include "bot-core/ut3-game/GameStateView.h"
+
 #include "bot-core/bot/MinimaxBot_v1.h"
+#include "bot-core/bot/RandomBot_v1.h"
 
 #include "bot-core-test/playground/BotsPlayground.h"
 
@@ -38,7 +41,7 @@ namespace ut3
                 printf("Match #%i:", matchindex);
             }
         );
-        playground.SetOnMatchEnded([](game::SGameState const& /*gameState*/, CPlayground::SMatchStatistics matchStats)
+        playground.SetOnMatchEnded([](game::SGameState const& gameState, CPlayground::SMatchStatistics matchStats)
             {
                 if (matchStats.m_winner == GAME_STATE_ELEMENT_DRAW)
                 {
@@ -48,9 +51,11 @@ namespace ut3
                 {
                     printf(" bot_%i (%c)\n", matchStats.m_winnerBotIndex, game::ConvertGameStateElemToChar(matchStats.m_winner));
                 }
+                game::SGameStateView(gameState).Print();
+                printf("\n");
             }
         );
-        playground.PlayGames<CMinimaxBot_v1, CMinimaxBot_v1>(50);
+        playground.PlayGames<bot::CMinimaxBot_v1, bot::CRandomBot_v1>(20);
 
         PrintResults(playground.GetStatistics());
     }

@@ -13,8 +13,9 @@
 
 using namespace std::chrono_literals;
 
-namespace ut3
-{
+namespace ut3 {
+namespace bot {
+
     namespace
     {
         class CUT3MinimaxResolver
@@ -97,36 +98,22 @@ namespace ut3
 
     SOutputData CMinimaxBot_v1::FirstUpdate(SInputData initData)
     {
-        if (initData.m_oppTurnX >= 0)
-        {
-            m_myPlayer = 1;
-            return Update(initData);
-        }
-        else
-        {
-            m_myPlayer = 0;
-            SOutputData output{ 4, 4 };
-            game::MakeTurn(m_gameState, output.m_turnX, output.m_turnY);
-            return output;
-        }
+        m_myPlayer = (initData.m_oppTurnX >= 0) ? 1 : 0;
+        return CBotBase::FirstUpdate(initData);
     }
 
-    SOutputData CMinimaxBot_v1::Update(SInputData turnData)
+    SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState)
     {
-        game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
-        if (m_isDebugEnabled)
-        {
-            game::SGameStateView(m_gameState).Print();
-        }
-
-        auto const turn = FindTurn(m_gameState, m_myPlayer, m_isDebugEnabled);
-
-        game::MakeTurn(m_gameState, turn[0], turn[1]);
-        return { turn[0], turn[1] };
+        return FindTurn(gameState, m_myPlayer, m_isDebugEnabled);
     }
 
     SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled)
     {
+        if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0)
+        {
+            return { 4, 4 };
+        }
+
         auto const startTime = std::chrono::high_resolution_clock::now();
         auto const endTime = startTime + 95ms;
 
@@ -195,4 +182,6 @@ namespace ut3
 
         return turn;
     }
+
+}
 }

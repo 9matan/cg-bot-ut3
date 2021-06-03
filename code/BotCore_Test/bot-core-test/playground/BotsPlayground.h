@@ -3,6 +3,8 @@
 #include <array>
 #include <functional>
 
+#include "mimax/common/Random.h"
+
 #include "bot-core/bot/IBot.h"
 #include "bot-core/ut3-game/GameState.h"
 #include "bot-core/ut3-game/GameStateHelper.h"
@@ -45,6 +47,7 @@ namespace ut3
         template<typename TBot1, typename TBot2>
         void PlayGames(int const matchesCount)
         {
+            mimax::common::UpdateRandomSeed();
             for (int matchIndex = 0; matchIndex < matchesCount * 2; ++matchIndex)
             {
                 if (m_onMatchStart) m_onMatchStart(matchIndex);

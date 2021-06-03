@@ -2,24 +2,28 @@
 
 #include "mimax/common/Vec2.h"
 
-#include "bot-core/bot/IBot.h"
+#include "bot-core/bot/BotBase.h"
 
 #include "bot-core/ut3-game/GameState.h"
 
-namespace ut3
-{
-    class CMinimaxBot_v1 : public IBot
+namespace ut3 {
+namespace bot {
+
+    class CMinimaxBot_v1 : public CBotBase
     {
     public:
         static SVec2 FindTurn(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled = false);
+    
     public:
         SOutputData FirstUpdate(SInputData initData) override;
-        SOutputData Update(SInputData turnData) override;
-        void SetDebugIsEnabled(bool const enableDebug) override { m_isDebugEnabled = enableDebug; }
         char const* GetBotName() const override { return "CMinimaxBot_v1"; }
+    
+    protected:
+        SVec2 FindTurn(game::SGameState const& gameState) override;
+
     private:
         int m_myPlayer = -1;
-        game::SGameState m_gameState;
-        bool m_isDebugEnabled = false;
     };
+
+}
 }

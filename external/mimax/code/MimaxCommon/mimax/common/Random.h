@@ -5,35 +5,36 @@
 namespace mimax {
 namespace common {
 
-unsigned int UpdateRandomSeed();
-// exclusive max
-unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal);
+    unsigned int GenerateRandomSeed();
+    unsigned int UpdateRandomSeed(unsigned int seed = 0);
+    // exclusive max
+    unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal);
 
-template<typename TIter>
-inline TIter GetRandomItem(TIter first, TIter last)
-{
-    size_t const rangeSize = static_cast<size_t>(last - first);
-    return first + GetRandomUInt32(0, static_cast<unsigned int>(rangeSize));
-}
-
-template<typename TEnum>
-inline TEnum GetRandomEnumValue()
-{
-    return static_cast<TEnum>(GetRandomUInt32(0, static_cast<unsigned int>(TEnum::Count)));
-}
-
-template<typename TIter>
-inline void RandomShuffle(TIter first, TIter last)
-{
-    if (first == last) return;
-    TIter current = last;
-    --current;
-
-    for (; current != first; --current)
+    template<typename TIter>
+    inline TIter GetRandomItem(TIter first, TIter last)
     {
-        std::swap(*current, *(first + GetRandomUInt32(0, (unsigned int)(current - first + 1))));
+        size_t const rangeSize = static_cast<size_t>(last - first);
+        return first + GetRandomUInt32(0, static_cast<unsigned int>(rangeSize));
     }
-}
+
+    template<typename TEnum>
+    inline TEnum GetRandomEnumValue()
+    {
+        return static_cast<TEnum>(GetRandomUInt32(0, static_cast<unsigned int>(TEnum::Count)));
+    }
+
+    template<typename TIter>
+    inline void RandomShuffle(TIter first, TIter last)
+    {
+        if (first == last) return;
+        TIter current = last;
+        --current;
+
+        for (; current != first; --current)
+        {
+            std::swap(*current, *(first + GetRandomUInt32(0, (unsigned int)(current - first + 1))));
+        }
+    }
 
 }
 }

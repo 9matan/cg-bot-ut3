@@ -4,22 +4,31 @@
 #include <random>
 #include <time.h>
 
+#include "mimax/common/Random.h"
+
 namespace mimax {
 namespace common {
 
-unsigned int UpdateRandomSeed()
-{
-    unsigned int const seed = static_cast<unsigned int>(time(nullptr));
-    srand(seed);
-    return seed;
-}
+    unsigned int GenerateRandomSeed()
+    {
+        return (unsigned int)time(nullptr);
+    }
 
-unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal)
-{
-    assert(minVal < maxVal);
-    unsigned int const range = maxVal - minVal;
-    return rand() % range + minVal;
-}
+    unsigned int UpdateRandomSeed(unsigned int seed)
+    {
+        if (seed == 0)
+            seed = GenerateRandomSeed();
+
+        srand(seed);
+        return seed;
+    }
+
+    unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal)
+    {
+        assert(minVal < maxVal);
+        unsigned int const range = maxVal - minVal;
+        return rand() % range + minVal;
+    }
 
 }
 }

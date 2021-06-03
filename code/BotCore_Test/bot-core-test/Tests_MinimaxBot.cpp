@@ -22,7 +22,7 @@ namespace ut3 {
             };
             auto const gameState = game::CreateGameState(map, {0, 4});
 
-            assert(CMinimaxBot_v1::FindTurn(gameState, 0) == SVec2(2, 3));
+            assert(bot::CMinimaxBot_v1::FindTurn(gameState, 0) == SVec2(2, 3));
         }
     }
 

@@ -38,8 +38,6 @@ namespace ut3
 
     game::SGameState PlayGame(std::array<IBot*, 2> bots)
     {
-        mimax::common::UpdateRandomSeed();
-
         bots[0]->SetDebugIsEnabled(false);
         bots[1]->SetDebugIsEnabled(false);
 

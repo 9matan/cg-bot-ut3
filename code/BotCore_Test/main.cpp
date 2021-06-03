@@ -7,7 +7,9 @@
 
 #include "bot-core-test/Tests_MinimaxBot.h"
 
-int main()
+#include "bot-core-test/playground/BotsPlaygroundCases.h"
+
+void RunTests()
 {
 	ut3::game::RunTests_BitGetSet();
 	ut3::game::RunTests_GameState();
@@ -15,6 +17,12 @@ int main()
 	ut3::game::RunTests_Game();
 
 	ut3::RunTests_MinimaxBot();
+}
+
+int main()
+{
+	RunTests();
+	ut3::Run_Playground_Cases();
 
 	return 0;
 }

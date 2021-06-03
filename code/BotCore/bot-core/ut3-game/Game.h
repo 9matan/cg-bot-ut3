@@ -14,5 +14,6 @@ namespace game {
     int CalculateWinner(SGameBlockState const blockState);
     void MakeTurn(SGameState& gameState, int const worldX, int const worldY);
     void CollectPossibleTurns(SGameState const& gameState, Turns& turnsOut);
+
 }
 }

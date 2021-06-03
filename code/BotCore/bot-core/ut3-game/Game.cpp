@@ -4,7 +4,7 @@
 
 namespace
 {
-    // masks si computed for X player. To get O - shift it left for a one bit
+    // masks is computed for X player. To get O - shift it left for a one bit
     constexpr size_t WINNER_MASKS_COUNT = 8;
     constexpr unsigned int WINNER_MASKS[WINNER_MASKS_COUNT] = {
         21, // first row
@@ -74,6 +74,17 @@ namespace game {
             }
         }
 
+        
+        /*
+        // OR calculate an empties count as a drawes one
+        int const elementsCount = GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(blockState, 0) 
+                                + GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(blockState, 1)
+                                + GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(blockState);
+        if (elementsCount == 9)
+        {
+            return GAME_STATE_ELEMENT_EMPTY;
+        }
+        */
         for (int i = 0; i < 9; ++i)
         {
             if (GAME_BLOCK_STATE_GET_ELEMENT(blockState, i) == GAME_STATE_ELEMENT_EMPTY)

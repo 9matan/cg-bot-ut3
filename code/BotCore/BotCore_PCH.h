@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <array>
-#include <assert.h>
+#include <cassert>
 #include <cstring>
 #include <functional>
 #include <iostream>

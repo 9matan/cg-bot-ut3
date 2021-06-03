@@ -95,18 +95,8 @@ namespace ut3
         };
     }
 
-
-    CMinimaxBot_v1::CMinimaxBot_v1(SInputData /*initData*/)
-        : m_myPlayer(-1)
-    {
-    }
-
     SOutputData CMinimaxBot_v1::FirstUpdate(SInputData initData)
     {
-        int const randomSeed = mimax::common::UpdateRandomSeed();
-        std::cerr << "Random seed: " << randomSeed << "\n";
-        std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";
-
         if (initData.m_oppTurnX >= 0)
         {
             m_myPlayer = 1;
@@ -124,15 +114,18 @@ namespace ut3
     SOutputData CMinimaxBot_v1::Update(SInputData turnData)
     {
         game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
-        game::SGameStateView(m_gameState).Print();
+        if (m_isDebugEnabled)
+        {
+            game::SGameStateView(m_gameState).Print();
+        }
 
-        auto const turn = FindTurn(m_gameState, m_myPlayer);
+        auto const turn = FindTurn(m_gameState, m_myPlayer, m_isDebugEnabled);
 
         game::MakeTurn(m_gameState, turn[0], turn[1]);
         return { turn[0], turn[1] };
     }
 
-    SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPlayer)
+    SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled)
     {
         auto const startTime = std::chrono::high_resolution_clock::now();
         auto const endTime = startTime + 95ms;
@@ -161,7 +154,10 @@ namespace ut3
         {
             std::this_thread::yield();
         }
-        std::cerr << "Stopping threads ... \n";
+        if (debugEnabled)
+        {
+            std::cerr << "Stopping threads ... \n";
+        }
 
         for (auto& thread : threads)
         {
@@ -180,7 +176,10 @@ namespace ut3
             {
                 turn = threads[i].GetTurn();
 #if MIMAX_MINIMAX_DEBUG
-                threads[i].GetDebugInfo().Print();
+                if (debugEnabled)
+                {
+                    threads[i].GetDebugInfo().Print();
+                }
 #endif // MIMAX_MINIMAX_DEBUG
                 break;
             }

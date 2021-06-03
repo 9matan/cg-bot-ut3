@@ -1,7 +1,9 @@
 #include "Optimizations.h"
 
 #include <iostream>
+#include <thread>
 
+#include "mimax/common/Random.h"
 #include "mimax/common/Profiler.h"
 #include "bot-core/bot/MinimaxBot_v1.h"
 
@@ -25,10 +27,15 @@ void WriteData(ut3::SOutputData const& outputData)
 
 int main()
 {
+	int const randomSeed = mimax::common::UpdateRandomSeed();
+	std::cerr << "Random seed: " << randomSeed << "\n";
+	std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";
+
 	ut3::SInputData inData;
 
 	ReadData(inData);
-	ut3::CMinimaxBot_v1 bot(inData);
+	ut3::CMinimaxBot_v1 bot;
+	bot.SetDebugIsEnabled(true);
 	WriteData(bot.FirstUpdate(inData));
 
 	while (true)

@@ -15,12 +15,14 @@ namespace bot {
         SOutputData FirstUpdate(SInputData initData) override;
         SOutputData Update(SInputData turnData) override;
         void SetDebugIsEnabled(bool const enableDebug) override { m_isDebugEnabled = enableDebug; }
+        void Reset();
 
     protected:
         virtual SVec2 FindTurn(game::SGameState const& gameState) = 0;
 
     protected:
         game::SGameState m_gameState;
+        int m_myPlayer = -1;
         bool m_isDebugEnabled = false;
     };
 

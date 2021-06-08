@@ -9,20 +9,25 @@
 
 #include "bot-core-test/playground/BotsPlaygroundCases.h"
 
-void RunTests()
+void RunGameTests()
 {
 	ut3::game::RunTests_BitGetSet();
 	ut3::game::RunTests_GameState();
 	ut3::game::RunTests_GameStateHelper();
 	ut3::game::RunTests_Game();
+}
 
-	ut3::RunTests_MinimaxBot();
+void RundBotTests()
+{
+	ut3::bot::RunTests_MinimaxBot();
 }
 
 int main()
 {
-	RunTests();
-	ut3::Run_Playground_Cases();
+	RunGameTests();
+	RundBotTests();
+
+	ut3::bot::Run_Playground_Cases();
 
 	return 0;
 }

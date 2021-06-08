@@ -17,7 +17,8 @@ namespace game {
 #   define UT3_COUNT_BITS_64(number) (std::bitset<64>(number).count())
 
     // 0 - X, 1 - O
-#   define GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(playerIndex) (1ULL << playerIndex)
+#   define GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(playerIndex) (1ULL << (playerIndex))
+#   define GAME_STATE_PLAYER_ELEMENT_TO_PLAYER_INDEX(playerElement) ((playerElement) >> 1)
 
 #   define GAME_STATE_ELEMENT_EMPTY 0
 #   define GAME_STATE_ELEMENT_X 1

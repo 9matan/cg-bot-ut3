@@ -13,10 +13,12 @@ namespace bot {
     {
         if (initData.m_oppTurnX >= 0)
         {
+            m_myPlayer = 1;
             return Update(initData);
         }
         else
         {
+            m_myPlayer = 0;
             auto const turn = FindTurn(m_gameState);
             game::MakeTurn(m_gameState, turn[0], turn[1]);
             return { turn[0], turn[1] };
@@ -37,5 +39,11 @@ namespace bot {
         return { turn[0], turn[1] };
     }
 
+    void CBotBase::Reset()
+    {
+        m_gameState = game::SGameState();
+        m_myPlayer = -1;
+        m_isDebugEnabled = false;
+    }
 }
 }

@@ -5,6 +5,7 @@
 #include "bot-core/bot/MinimaxBot_v1.h"
 
 namespace ut3 {
+namespace bot {
 
     void RunTests_MinimaxBot_v1()
     {
@@ -31,4 +32,5 @@ namespace ut3 {
         RunTests_MinimaxBot_v1();
     }
 
+}
 }

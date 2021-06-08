@@ -96,12 +96,6 @@ namespace bot {
         };
     }
 
-    SOutputData CMinimaxBot_v1::FirstUpdate(SInputData initData)
-    {
-        m_myPlayer = (initData.m_oppTurnX >= 0) ? 1 : 0;
-        return CBotBase::FirstUpdate(initData);
-    }
-
     SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState)
     {
         return FindTurn(gameState, m_myPlayer, m_isDebugEnabled);

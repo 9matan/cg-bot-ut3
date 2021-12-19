@@ -1,11 +1,11 @@
 using Sharpmake;
 
 [Generate]
-public class MinimaxProject : CommonProject
+public class MimaxProject : CommonProject
 {
-    public MinimaxProject()
+    public MimaxProject()
     {
-        Name = "Minimax";
+        Name = "Mimax";
         SourceRootPath = @"[project.SharpmakeCsPath]";
     }
 
@@ -13,8 +13,8 @@ public class MinimaxProject : CommonProject
     {
         base.ConfigureAll(conf, target);
 
-        conf.PrecompHeader = "Minimax_PCH.h";
-        conf.PrecompSource = "Minimax_PCH.cpp";
+        conf.PrecompHeader = "Mimax_PCH.h";
+        conf.PrecompSource = "Mimax_PCH.cpp";
 
         conf.IncludePaths.Add(@"[project.SourceRootPath]");
 

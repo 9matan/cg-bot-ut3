@@ -21,6 +21,7 @@ public class CommonProject : Project
         conf.TargetPath = @"[project.SharpmakeCsPath]\..\..\Bin\[target.Platform]_[target.Optimization]";
 
         conf.Options.Add(Options.Vc.Compiler.Exceptions.Enable);
+        conf.Options.Add(Options.Vc.Compiler.CppLanguageStandard.CPP17);
     }
 }
 

@@ -1,7 +1,4 @@
-#include "Optimizations.h"
-
-#include <iostream>
-#include <thread>
+#include "BotHeader.h"
 
 #include "mimax/common/Random.h"
 #include "mimax/common/Profiler.h"

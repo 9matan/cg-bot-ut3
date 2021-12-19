@@ -1,4 +1,4 @@
-#include "MimaxCommon_PCH.h"
+#include "Mimax_PCH.h"
 #include "Vec2Helper.h"
 
 namespace mimax {

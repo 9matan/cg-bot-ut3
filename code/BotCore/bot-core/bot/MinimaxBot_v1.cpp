@@ -6,7 +6,9 @@
 
 #include "mimax/common/Random.h"
 #include "mimax/common/Vec2Helper.h"
-#include "mimax/minimax/MinimaxAlgorithmBase.h"
+#include "mimax/dma/MinimaxBase.h"
+#include "mimax/dma/tasks/MinimaxTask.h"
+#include "mimax/mt/TasksRunner.h"
 
 #include "bot-core/ut3-game/Game.h"
 #include "bot-core/ut3-game/GameStateView.h"
@@ -61,39 +63,8 @@ namespace bot {
             int m_myPlayer;
         };
 
-        using CUT3MinimaxAlgo = mimax::minimax::CMinimaxAlgorithmBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
-
-        class CMinimaxThread
-        {
-        public:
-            CMinimaxThread(game::SGameState const& gameState, unsigned int const depth, int const myPlayer, float const minValue)
-                : m_minimaxAlgo(depth, CUT3MinimaxResolver(myPlayer), minValue, 10.0f)
-                , m_isFinished(false)
-                , m_turn(-1, -1)
-                , m_thread([this, gameState]()
-                    {
-                        SVec2 foundTurn = m_minimaxAlgo.Solve(gameState).m_move;
-                        if (!m_minimaxAlgo.IsInterrupted())
-                            m_turn = foundTurn;
-                        m_isFinished = true;
-                    }
-                )
-            {
-            }
-            
-            inline void Stop() { if(!m_isFinished) m_minimaxAlgo.Interrupt(); }
-            inline void Join() { m_thread.join(); }
-            inline SVec2 GetTurn() const { return m_turn; }
-#if MIMAX_MINIMAX_DEBUG
-            inline CUT3MinimaxAlgo::SDebugInfo const& GetDebugInfo() const { return m_minimaxAlgo.GetDebugInfo(); }
-#endif // MIMAX_MINIMAX_DEBUG
-
-        private:
-            std::thread m_thread;
-            CUT3MinimaxAlgo m_minimaxAlgo;
-            SVec2 m_turn;
-            bool m_isFinished;
-        };
+        using CUT3MinimaxAlgo = mimax::dma::CMinimaxBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
+        using CMinimaxTask = mimax::dma::CMinimaxTask<CUT3MinimaxAlgo>;
     }
 
     SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState)
@@ -108,9 +79,6 @@ namespace bot {
             return { 4, 4 };
         }
 
-        auto const startTime = std::chrono::high_resolution_clock::now();
-        auto const endTime = startTime + 95ms;
-
         auto globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(gameState);
         size_t const playedBlocksCount =
             GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, 0)
@@ -118,48 +86,42 @@ namespace bot {
             + GAME_STATE_BLOCK_COUNT_DRAW_ELEMENTS(globalBlock);
         float const minScoreValue = (playedBlocksCount >= 6 ? (-1.0f) : (-2.0f));
 
-        int const gameStage = (GAME_STATE_ELEMENTS_COUNT(gameState) >= 40) ? 1 : 0;
-        int const hardwareConcurrency = std::thread::hardware_concurrency();
-        int constexpr threadsCountMax =  6;
-        int const threadsCount = (hardwareConcurrency >= 8) ? threadsCountMax : 4;
-        CMinimaxThread threads[threadsCountMax] = {
-            CMinimaxThread(gameState, 6, myPlayer, minScoreValue)
-            , CMinimaxThread(gameState, 7, myPlayer, minScoreValue)
-            , CMinimaxThread(gameState, 8, myPlayer, minScoreValue)
-            , CMinimaxThread(gameState, 9, myPlayer, minScoreValue)
-            , CMinimaxThread(gameState, (hardwareConcurrency >= 8) ? (10 + gameStage) : 1, myPlayer, minScoreValue)
-            , CMinimaxThread(gameState, (hardwareConcurrency >= 8) ? (11 + 2 * gameStage) : 1, myPlayer, minScoreValue)
-        };
+        std::vector<CUT3MinimaxAlgo> minimaxAlgos;
+        std::vector<CMinimaxTask> minimaxTasks;
+        std::vector<mimax::mt::ITask*> tasksToRun;
+        CUT3MinimaxResolver resolver(myPlayer);
+        CUT3MinimaxAlgo::SConfig config;
+        config.m_minValue = minScoreValue;
+        config.m_maxValue = 10.0f;
+        config.m_epsilon = 0.001f;
 
-        while (std::chrono::high_resolution_clock::now() < endTime)
-        {
-            std::this_thread::yield();
-        }
-        if (debugEnabled)
-        {
-            std::cerr << "Stopping threads ... \n";
-        }
+        auto const hardwareConcurrency = std::thread::hardware_concurrency();
+        minimaxAlgos.reserve(hardwareConcurrency);
+        minimaxTasks.reserve(hardwareConcurrency);
+        tasksToRun.reserve(hardwareConcurrency);
+        size_t const step = (hardwareConcurrency <= 4) ? 2 : 1;
 
-        for (auto& thread : threads)
+        size_t constexpr minDepth = 6;
+        for (size_t depth = minDepth; depth < minDepth + step * hardwareConcurrency; depth += step)
         {
-            thread.Stop();
+            config.m_maxDepth = depth;
+            auto& minimaxAlgo = minimaxAlgos.emplace_back(resolver, config);
+            auto& minimaxTask = minimaxTasks.emplace_back(&minimaxAlgo, gameState);
+            tasksToRun.push_back(&minimaxTask);
         }
 
-        for (auto& thread : threads)
-        {
-            thread.Join();
-        }
-
+        mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, 95ms);
         SVec2 turn = { -1, -1 };
-        for (int i = threadsCount - 1; i >= 0; --i)
+        for (int i = (int)minimaxTasks.size() - 1; i >= 0; --i)
         {
-            if (threads[i].GetTurn()[0] != -1)
+            auto& move = minimaxTasks[i].GetResult();
+            if (move.has_value())
             {
-                turn = threads[i].GetTurn();
+                turn = move.value();
 #if MIMAX_MINIMAX_DEBUG
                 if (debugEnabled)
                 {
-                    threads[i].GetDebugInfo().Print();
+                    std::cerr << minimaxAlgos[i].GetDebugInfo();
                 }
 #endif // MIMAX_MINIMAX_DEBUG
                 break;

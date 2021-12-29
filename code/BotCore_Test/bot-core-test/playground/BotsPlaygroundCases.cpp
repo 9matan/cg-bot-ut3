@@ -5,6 +5,7 @@
 #include "bot-core/ut3-game/GameHelper.h"
 
 #include "bot-core/bot/CustomBot.h"
+#include "bot-core/bot/MCTSBot_v1.h"
 #include "bot-core/bot/MinimaxBot_v1.h"
 #include "bot-core/bot/RandomBot_v1.h"
 
@@ -96,8 +97,9 @@ namespace bot {
         );
 
         return std::vector<IBot*>{
-            randomBotWithOpening
-            , new CRandomBot_v1()
+            //randomBotWithOpening
+            new CMCTSBot_v1()
+            //, new CRandomBot_v1()
             , new CMinimaxBot_v1()
         };
     }

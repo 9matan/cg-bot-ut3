@@ -2,6 +2,9 @@
 #include <random>
 #include <vector>
 
+#include "mimax/dma/MctsDebugInfo.h"
+#include "mimax/dma/MctsNodeEvalResult.h"
+
 namespace mimax {
 namespace dma {
 
@@ -21,13 +24,16 @@ TResolver
 */
 
 template<typename TState, typename TMove, typename TMovesContainer, typename TResolver>
-class CMCTSBase
+class CMctsBase
 {
 public:
-    CMCTSBase(TState const& rootSate, TResolver const& resolver, unsigned long long const randomSeed, float const explorationParam = 1.4142f)
+    CMctsBase(TState const& rootSate, TResolver const& resolver, unsigned long long const randomSeed, float const explorationParam = 1.4142f)
         : m_resolver(resolver)
         , m_randomEngine(randomSeed)
         , m_explorationParam(explorationParam)
+#if MIMAX_MCTS_DEBUG
+        , m_currentDepth(0)
+#endif // MIMAX_MCTS_DEBUG
     {
         m_root = SNode();
         m_root.m_state = rootSate;
@@ -49,6 +55,24 @@ public:
             })->m_move;
     }
 
+    SMctsNodeEvalResult<TMove> GetRootEvalResult() const
+    {
+        SMctsNodeEvalResult<TMove> evalResult;
+
+        evalResult.m_childrenInfo.resize(m_root.m_children.size());
+        for (size_t i = 0; i < m_root.m_children.size(); ++i)
+        {
+            evalResult.m_childrenInfo[i].m_move = m_root.m_children[i].m_move;
+            evalResult.m_childrenInfo[i].m_simulationsCount = m_root.m_children[i].m_simulationsCount;
+        }
+
+        return std::move(evalResult);
+    }
+
+#if MIMAX_MCTS_DEBUG
+    inline SMctsDebugInfo const& GetDebugInfo() const { return m_debugInfo; }
+#endif // MIMAX_MCTS_DEBUG
+
 private:
     struct SNode
     {
@@ -65,10 +89,10 @@ private:
         inline bool HasUnvisitedChildren() const { return m_unvisitedChildrenCount > 0; }
 
         std::vector<SNode> m_children;
-        SNode* m_parent;
         unsigned int m_simulationsCount;
         float m_score;
         float m_uctScore;
+        SNode* m_parent;
         TState m_state;
         TMove m_move;
         unsigned short m_unvisitedChildrenCount;
@@ -80,6 +104,10 @@ private:
     SNode m_root;
     float m_explorationParam;
     TMovesContainer m_movesBuffer;
+#if MIMAX_MCTS_DEBUG
+    SMctsDebugInfo m_debugInfo;
+    size_t m_currentDepth;
+#endif // MIMAX_MCTS_DEBUG
 
 private:
     bool Expanse(SNode* node)
@@ -98,12 +126,19 @@ private:
         }
         node->m_unvisitedChildrenCount = (unsigned short)node->m_children.size();
 
+#if MIMAX_MCTS_DEBUG
+        m_debugInfo.ExpanseNode(m_currentDepth, node->m_children.size());
+#endif // MIMAX_MCTS_DEBUG
+
         return !m_movesBuffer.empty();
     }
 
     void MakeIteration()
     {
         SNode* curNode = SelectChildNode(&m_root);
+#if MIMAX_MCTS_DEBUG
+        m_currentDepth = 1;
+#endif // MIMAX_MCTS_DEBUG
         while (curNode->IsVisited())
         {
             if (!curNode->HasChildren() && !Expanse(curNode))
@@ -111,17 +146,27 @@ private:
                 break;
             }
             curNode = SelectChildNode(curNode);
+#if MIMAX_MCTS_DEBUG
+            ++m_currentDepth;
+#endif // MIMAX_MCTS_DEBUG
         }
 
-        float const score = curNode->IsVisited()
+        float score = curNode->IsVisited()
             ? curNode->m_score / (float)curNode->m_simulationsCount
             : VisitNode(curNode);
 
         while (curNode != nullptr)
         {
             UpdateStatistics(curNode, score);
+            score = 1.0f - score;
             curNode = curNode->m_parent;
+#if MIMAX_MCTS_DEBUG
+            --m_currentDepth;
+#endif // MIMAX_MCTS_DEBUG
         }
+#if MIMAX_MCTS_DEBUG
+        ++m_debugInfo.m_simulationsCnt;
+#endif // MIMAX_MCTS_DEBUG
     }
 
     inline SNode* SelectChildNode(SNode* node)
@@ -137,6 +182,9 @@ private:
         --parent->m_unvisitedChildrenCount;
         node->m_state = parent->m_state;
         m_resolver.MakeMove(node->m_state, node->m_move);
+#if MIMAX_MCTS_DEBUG
+        m_debugInfo.VisitNode(m_currentDepth);
+#endif // MIMAX_MCTS_DEBUG
         return m_resolver.Playout(node->m_state);
     }
 
@@ -174,7 +222,7 @@ private:
     inline float CalculateUCTScore(SNode const* node)
     {
         auto const parentSimCount = node->m_parent->m_simulationsCount;
-        return  (float)node->m_score / (float)node->m_simulationsCount
+        return  1.0f - (float)node->m_score / (float)node->m_simulationsCount
             + m_explorationParam * (float)sqrt(log(parentSimCount) / node->m_simulationsCount);
     }
 };

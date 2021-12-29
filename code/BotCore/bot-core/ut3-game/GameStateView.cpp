@@ -58,7 +58,14 @@ namespace game {
     {
         for (int r = 0; r < 9; ++r)
         {
-            std::cerr << m_map[r] << "\n";
+            for (int c = 0; c < 9; ++c)
+            {
+                std::cerr << m_map[r][c];
+                if (c == 2 || c == 5) std::cerr << " ";
+            }
+            std::cerr << "\n";
+
+            if (r == 2 || r == 5) std::cerr << "\n";
         }
         for (int r = 0; r < 3; ++r)
         {

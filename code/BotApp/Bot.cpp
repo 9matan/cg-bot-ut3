@@ -2,7 +2,7 @@
 
 #include "mimax/common/Random.h"
 #include "mimax/common/Profiler.h"
-#include "bot-core/bot/MinimaxBot_v1.h"
+#include "bot-core/bot/MCTSBot_v1.h"
 
 void ReadData(ut3::SInputData& inputData)
 {
@@ -31,8 +31,8 @@ int main()
 	ut3::SInputData inData;
 
 	ReadData(inData);
-	ut3::bot::CMinimaxBot_v1 bot;
-	bot.SetDebugIsEnabled(true);
+	ut3::bot::CMCTSBot_v1 bot;
+	bot.SetDebugIsEnabled(false);
 	WriteData(bot.FirstUpdate(inData));
 
 	while (true)

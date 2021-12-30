@@ -45,7 +45,7 @@
 */
 #endif // defined(__GNUC__) || defined(__GNUG__)
 
-// #define RELEASE_BOT (1)
+// #define RELEASE_BOT (1) // [Enable]
 
 #if RELEASE_BOT
 

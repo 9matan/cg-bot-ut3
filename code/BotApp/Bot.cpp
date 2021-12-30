@@ -31,7 +31,7 @@ int main()
 	ut3::SInputData inData;
 
 	ReadData(inData);
-	ut3::bot::CMCTSBot_v1 bot;
+	ut3::bot::CMCTSBot_v1 bot(1.0f, 30);
 #if RELEASE_BOT
 	bot.SetDebugIsEnabled(false);
 #else

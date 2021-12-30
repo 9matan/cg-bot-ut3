@@ -7,6 +7,8 @@
 #pragma GCC optimize("Ofast")
 #endif 
 
+#define RELEASE_BOT (1) 
+
 #if RELEASE_BOT
 
 #   ifndef NDEBUG
@@ -186,7 +188,7 @@ namespace ut3 {namespace bot {template<size_t TCacheSize>class CUT3MctsCachedMat
 public:struct SDebugStats{float m_totalNodesCnt = 0.0f;float m_totalVisitedNodesCnt = 0.0f;float m_simulationsCnt = 0.0f;};private:std::vector<SDebugStats> m_debugStatsHistory;
 #endif 
 private:std::vector<CUT3Mcts> m_mctsAlgos;};}}
-void ReadData(ut3::SInputData& inputData){std::cin >> inputData.m_oppTurnY >> inputData.m_oppTurnX;int validActionCount;scanf("%i", &validActionCount);for (int i = 0; i < validActionCount; ++i){int x, y;scanf("%i%i", &x, &y);}}void WriteData(ut3::SOutputData const& outputData){std::cout << outputData.m_turnY << " " << outputData.m_turnX << "\n";}int main(){int const randomSeed = mimax::common::UpdateRandomSeed();std::cerr << "Random seed: " << randomSeed << "\n";std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";ut3::SInputData inData;ReadData(inData);ut3::bot::CMCTSBot_v1 bot;
+void ReadData(ut3::SInputData& inputData){std::cin >> inputData.m_oppTurnY >> inputData.m_oppTurnX;int validActionCount;scanf("%i", &validActionCount);for (int i = 0; i < validActionCount; ++i){int x, y;scanf("%i%i", &x, &y);}}void WriteData(ut3::SOutputData const& outputData){std::cout << outputData.m_turnY << " " << outputData.m_turnX << "\n";}int main(){int const randomSeed = mimax::common::UpdateRandomSeed();std::cerr << "Random seed: " << randomSeed << "\n";std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";ut3::SInputData inData;ReadData(inData);ut3::bot::CMCTSBot_v1 bot(1.0f, 30);
 #if RELEASE_BOT
 bot.SetDebugIsEnabled(false);
 #else

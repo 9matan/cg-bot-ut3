@@ -87,20 +87,21 @@ namespace bot {
 
     std::vector<IBot*> CreateBots()
     {
-        auto randomBotWithOpening = new CCustomBot(
+        /*auto randomBotWithOpening = new CCustomBot(
             [](game::SGameState const& gameState, int const myPlayer, bool const debugEnabled)
             {
                 if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0) return SVec2{ 4, 4 };
 
                 return CRandomBot_v1::FindTurn(gameState, myPlayer, debugEnabled);
             }, "Random_v2"
-        );
+        );*/
 
         return std::vector<IBot*>{
             //randomBotWithOpening
             new CMCTSBot_v1()
+            , new CMCTSBot_v1()
             //, new CRandomBot_v1()
-            , new CMinimaxBot_v1()
+            //, new CMinimaxBot_v1()
         };
     }
 
@@ -115,7 +116,7 @@ namespace bot {
     void Run_Playground_Cases()
     {
         auto bots = CreateBots();
-        int const matchesCount = 20;
+        int const matchesCount = 1;// 20;
 
         auto playground = CConsoleBotsPlayground().RunPlayground(bots, matchesCount);
 

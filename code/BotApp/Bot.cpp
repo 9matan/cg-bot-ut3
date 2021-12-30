@@ -32,7 +32,11 @@ int main()
 
 	ReadData(inData);
 	ut3::bot::CMCTSBot_v1 bot;
+#if RELEASE_BOT
 	bot.SetDebugIsEnabled(false);
+#else
+	bot.SetDebugIsEnabled(true);
+#endif
 	WriteData(bot.FirstUpdate(inData));
 
 	while (true)

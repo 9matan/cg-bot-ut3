@@ -2,6 +2,8 @@
 #include <random>
 #include <vector>
 
+#include "mimax/common/MathHelper.h"
+#include "mimax/common/ObjectPool.h"
 #include "mimax/dma/MctsDebugInfo.h"
 #include "mimax/dma/MctsNodeEvalResult.h"
 
@@ -23,21 +25,43 @@ TResolver
     float Playout(TState const&)
 */
 
-template<typename TState, typename TMove, typename TMovesContainer, typename TResolver>
+template<
+    typename TState,
+    typename TMove,
+    typename TMovesContainer,
+    typename TResolver,
+    typename TMathHelper = mimax::common::CMathHelper>
 class CMctsBase
 {
 public:
-    CMctsBase(TState const& rootSate, TResolver const& resolver, unsigned long long const randomSeed, float const explorationParam = 1.4142f)
+    struct SConfig
+    {
+        size_t m_randomSeed;
+        size_t m_nodesPoolSize = 65000;
+        float m_explorationParam = 1.4142f;
+    };
+
+public:
+    CMctsBase(TResolver const& resolver, SConfig const& config)
         : m_resolver(resolver)
-        , m_randomEngine(randomSeed)
-        , m_explorationParam(explorationParam)
+        , m_randomEngine(config.m_randomSeed)
+        , m_config(config)
 #if MIMAX_MCTS_DEBUG
         , m_currentDepth(0)
 #endif // MIMAX_MCTS_DEBUG
     {
-        m_root = SNode();
-        m_root.m_state = rootSate;
-        bool const successful = Expanse(&m_root);
+    }
+
+    void Reset(TState const& state)
+    {
+#if MIMAX_MCTS_DEBUG
+        m_debugInfo.Reset();
+        m_currentDepth = 0;
+#endif // MIMAX_MCTS_DEBUG
+        m_nodesPool.ResetPool(m_config.m_nodesPoolSize);
+        m_root = AllocateNode();
+        m_root->m_state = state;
+        bool const successful = Expanse(m_root);
         assert(successful);
     }
 
@@ -48,22 +72,33 @@ public:
 
     TMove GetCurrentResult() const
     {
-        return std::max_element(m_root.m_children.begin(), m_root.m_children.end(),
-            [](SNode const& lhs, SNode const& rhs)
+        SNode* childNode = m_root->m_firstChild;
+        SNode* bestNode = m_root->m_firstChild;
+
+        while (childNode != nullptr)
+        {
+            if (childNode->m_simulationsCount > bestNode->m_simulationsCount)
             {
-                return lhs.m_simulationsCount < rhs.m_simulationsCount;
-            })->m_move;
+                bestNode = childNode;
+            }
+
+            childNode = childNode->m_nextNode;
+        }
+
+        return bestNode->m_move;
     }
 
     SMctsNodeEvalResult<TMove> GetRootEvalResult() const
     {
         SMctsNodeEvalResult<TMove> evalResult;
 
-        evalResult.m_childrenInfo.resize(m_root.m_children.size());
-        for (size_t i = 0; i < m_root.m_children.size(); ++i)
+        SNode* childNode = m_root->m_firstChild;
+        while(childNode != nullptr)
         {
-            evalResult.m_childrenInfo[i].m_move = m_root.m_children[i].m_move;
-            evalResult.m_childrenInfo[i].m_simulationsCount = m_root.m_children[i].m_simulationsCount;
+            auto& info = evalResult.m_childrenInfo.emplace_back();
+            info.m_move = childNode->m_move;
+            info.m_simulationsCount = childNode->m_simulationsCount;
+            childNode = childNode->m_nextNode;
         }
 
         return std::move(evalResult);
@@ -79,20 +114,21 @@ private:
         SNode()
             : m_simulationsCount(0)
             , m_score(0)
-            , m_uctScore(0.0f)
             , m_parent(nullptr)
+            , m_nextNode(nullptr)
+            , m_firstChild(nullptr)
             , m_unvisitedChildrenCount(0)
         {}
 
         inline bool IsVisited() const { return m_simulationsCount > 0; }
-        inline bool HasChildren() const { return !m_children.empty(); }
+        inline bool HasChildren() const { return m_firstChild != nullptr; }
         inline bool HasUnvisitedChildren() const { return m_unvisitedChildrenCount > 0; }
 
-        std::vector<SNode> m_children;
         unsigned int m_simulationsCount;
         float m_score;
-        float m_uctScore;
         SNode* m_parent;
+        SNode* m_nextNode;
+        SNode* m_firstChild;
         TState m_state;
         TMove m_move;
         unsigned short m_unvisitedChildrenCount;
@@ -101,41 +137,52 @@ private:
 private:
     std::mt19937_64 m_randomEngine;
     TResolver m_resolver;
-    SNode m_root;
-    float m_explorationParam;
+    SNode* m_root;
+    SConfig m_config;
     TMovesContainer m_movesBuffer;
+    mimax::common::CObjectPool<SNode> m_nodesPool;
 #if MIMAX_MCTS_DEBUG
     SMctsDebugInfo m_debugInfo;
     size_t m_currentDepth;
 #endif // MIMAX_MCTS_DEBUG
 
 private:
+    inline SNode* AllocateNode()
+    {
+        if (m_nodesPool.IsEmpty()) return nullptr;
+        return m_nodesPool.AllocateObject();
+    }
+
     bool Expanse(SNode* node)
     {
         m_resolver.GetPossibleMoves(node->m_state, m_movesBuffer);
         std::shuffle(m_movesBuffer.begin(), m_movesBuffer.end(), m_randomEngine);
 
-        node->m_children.resize(m_movesBuffer.size());
-        auto curChild = node->m_children.begin();
+        SNode** curChildIter = &(node->m_firstChild);
         for (auto const move : m_movesBuffer)
         {
+            SNode* curChild = AllocateNode();
+            if (curChild == nullptr) break;
+
             curChild->m_parent = node;
             curChild->m_move = move;
 
-            ++curChild;
+            *curChildIter = curChild;
+            curChildIter = &(curChild->m_nextNode);
+            
+            ++node->m_unvisitedChildrenCount;
         }
-        node->m_unvisitedChildrenCount = (unsigned short)node->m_children.size();
 
 #if MIMAX_MCTS_DEBUG
-        m_debugInfo.ExpanseNode(m_currentDepth, node->m_children.size());
+        m_debugInfo.ExpanseNode(m_currentDepth, node->m_unvisitedChildrenCount);
 #endif // MIMAX_MCTS_DEBUG
 
-        return !m_movesBuffer.empty();
+        return node->m_unvisitedChildrenCount > 0;
     }
 
     void MakeIteration()
     {
-        SNode* curNode = SelectChildNode(&m_root);
+        SNode* curNode = SelectChildNode(m_root);
 #if MIMAX_MCTS_DEBUG
         m_currentDepth = 1;
 #endif // MIMAX_MCTS_DEBUG
@@ -196,34 +243,46 @@ private:
 
     inline SNode* GetFirstUnvisitedChild(SNode* node)
     {
-        auto iter = std::find_if(node->m_children.begin(), node->m_children.end(),
-            [](SNode const& child)
+        auto childNode = node->m_firstChild;
+        while (childNode != nullptr)
+        {
+            if (!childNode->IsVisited())
             {
-                return !child.IsVisited();
-            });
-        assert(iter != node->m_children.end());
-        return &(*iter);
+                return childNode;
+            }
+            childNode = childNode->m_nextNode;
+        }
+        assert(false);
+        return nullptr;
     }
 
     inline SNode* GetBestNodeByUCT(SNode* node)
     {
-        for (auto& child : node->m_children)
+        assert(node->HasChildren());
+
+        SNode* childNode = node->m_firstChild;
+        SNode* bestNode = node->m_firstChild;
+        float bestUCTScore = 0.0f;
+
+        while (childNode != nullptr)
         {
-            child.m_uctScore = CalculateUCTScore(&child);
-        }
-        auto iter = std::max_element(node->m_children.begin(), node->m_children.end(),
-            [](SNode const& lhs, SNode const& rhs)
+            float const childUCTScore = CalculateUCTScore(childNode);
+            if (childUCTScore > bestUCTScore)
             {
-                return lhs.m_uctScore < rhs.m_uctScore;
-            });
-        return &(*iter);
+                bestNode = childNode;
+                bestUCTScore = childUCTScore;
+            }
+            childNode = childNode->m_nextNode;
+        }
+
+        return bestNode;
     }
 
     inline float CalculateUCTScore(SNode const* node)
     {
         auto const parentSimCount = node->m_parent->m_simulationsCount;
         return  1.0f - (float)node->m_score / (float)node->m_simulationsCount
-            + m_explorationParam * (float)sqrt(log(parentSimCount) / node->m_simulationsCount);
+            + m_config.m_explorationParam * TMathHelper::sqrt(TMathHelper::log(parentSimCount) / node->m_simulationsCount);
     }
 };
 

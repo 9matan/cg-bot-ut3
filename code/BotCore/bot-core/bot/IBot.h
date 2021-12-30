@@ -16,6 +16,8 @@ namespace bot {
         virtual void SetDebugIsEnabled(bool const enableDebug) = 0;
         virtual char const* GetBotName() const = 0;
         virtual void Reset() = 0;
+
+        virtual void OnMatchEnded() {}
     };
 
 }

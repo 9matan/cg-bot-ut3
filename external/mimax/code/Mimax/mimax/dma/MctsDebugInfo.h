@@ -1,6 +1,6 @@
 #pragma once
 
-//#define MIMAX_MCTS_DEBUG (1)
+// #define MIMAX_MCTS_DEBUG (1)
 
 #if MIMAX_MCTS_DEBUG
 #include <iostream>

@@ -15,7 +15,7 @@ namespace bot {
         SOutputData FirstUpdate(SInputData initData) override;
         SOutputData Update(SInputData turnData) override;
         void SetDebugIsEnabled(bool const enableDebug) override { m_isDebugEnabled = enableDebug; }
-        void Reset();
+        void Reset() override;
 
     protected:
         virtual SVec2 FindTurn(game::SGameState const& gameState) = 0;

@@ -22,6 +22,8 @@ public class CommonProject : Project
 
         conf.Options.Add(Options.Vc.Compiler.Exceptions.Enable);
         conf.Options.Add(Options.Vc.Compiler.CppLanguageStandard.CPP17);
+
+        conf.Defines.Add("MIMAX_MCTS_DEBUG=1");
     }
 }
 

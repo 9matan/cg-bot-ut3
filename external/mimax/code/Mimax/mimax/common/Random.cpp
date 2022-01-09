@@ -30,5 +30,11 @@ namespace common {
         return rand() % range + minVal;
     }
 
+    size_t GetRandomSizeT(size_t const minVal, size_t const maxVal)
+    {
+        assert(minVal < maxVal);
+        size_t const range = maxVal - minVal;
+        return rand() % range + minVal;
+    }
 }
 }

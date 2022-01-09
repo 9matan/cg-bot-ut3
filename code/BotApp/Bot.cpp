@@ -27,11 +27,26 @@ int main()
 	int const randomSeed = mimax::common::UpdateRandomSeed();
 	std::cerr << "Random seed: " << randomSeed << "\n";
 	std::cerr << "Hardware concurrency: " << std::thread::hardware_concurrency() << "\n";
+#ifdef _ITERATOR_DEBUG_LEVEL
+	std::cerr << "_ITERATOR_DEBUG_LEVEL: " << _ITERATOR_DEBUG_LEVEL << "\n";
+#endif
+#ifdef NDEBUG
+	std::cerr << "NDEBUG" << "\n";
+#endif
+#ifdef _DEBUG
+	std::cerr << "_DEBUG" << "\n";
+#endif
+#ifdef _GLIBCXX_DEBUG
+	std::cerr << "_GLIBCXX_DEBUG" << "\n";
+#endif
+#ifdef _GLIBCXX_INLINE_VERSION
+	std::cerr << "_GLIBCXX_INLINE_VERSION: " << _GLIBCXX_INLINE_VERSION << "\n";
+#endif
 
 	ut3::SInputData inData;
 
 	ReadData(inData);
-	ut3::bot::CMCTSBot_v1 bot(1.0f, 30);
+	ut3::bot::CMCTSBot_v1 bot(0.35f, 60);
 #if RELEASE_BOT
 	bot.SetDebugIsEnabled(false);
 #else

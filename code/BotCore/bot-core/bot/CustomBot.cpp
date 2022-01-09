@@ -5,9 +5,9 @@ namespace ut3 {
 namespace bot {
 
 
-    CCustomBot::CCustomBot(FindTurnFunc findTurnFunc, std::string const& botName)
-        : m_findTurnFunc(findTurnFunc)
-        , m_botName(botName)
+    CCustomBot::CCustomBot(FindTurnFunc findTurnFunc, char const* botName)
+        : CBotBase(botName)
+        , m_findTurnFunc(findTurnFunc)
     {}
 
     SVec2 CCustomBot::FindTurn(game::SGameState const& gameState)

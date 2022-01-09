@@ -62,6 +62,11 @@
 #   endif
 #   define _ITERATOR_DEBUG_LEVEL 0
 
+#   ifdef _GLIBCXX_INLINE_VERSION
+#   undef _GLIBCXX_INLINE_VERSION
+#   endif
+#   define _GLIBCXX_INLINE_VERSION 1
+
 #else // RELEASE_BOT
 
 #   ifdef MIMAX_MCTS_DEBUG

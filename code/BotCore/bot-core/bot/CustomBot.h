@@ -13,16 +13,12 @@ namespace bot {
     public:
         using FindTurnFunc = std::function<SVec2(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled)>;
 
-        CCustomBot(FindTurnFunc findTurnFunc, std::string const& botName);
-
-    public:
-        char const* GetBotName() const override { return m_botName.c_str(); }
+        CCustomBot(FindTurnFunc findTurnFunc, char const* botName);
 
     protected:
         SVec2 FindTurn(game::SGameState const& gameState) override;
 
     private:
-        std::string m_botName;
         FindTurnFunc m_findTurnFunc;
     };
 

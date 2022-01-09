@@ -67,10 +67,8 @@ using CUT3Mcts = mimax::dma::CMctsBase<game::SGameState, SVec2, game::Turns, CUT
 class CMCTSBot_v1 : public CBotBase
 {
 public:
-    CMCTSBot_v1();
-    CMCTSBot_v1(float explorationParam, size_t const maxDepth);
+    CMCTSBot_v1(float explorationParam, size_t const maxDepth, char const* botName = "CMCTSBot_v1");
 
-    char const* GetBotName() const override { return "CMCTSBot_v1"; }
     void Reset() override;
     void OnMatchEnded() override;
 

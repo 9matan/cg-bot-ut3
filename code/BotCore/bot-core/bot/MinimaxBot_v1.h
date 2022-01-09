@@ -15,7 +15,7 @@ namespace bot {
         static SVec2 FindTurn(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled = false);
     
     public:
-        char const* GetBotName() const override { return "CMinimaxBot_v1"; }
+        CMinimaxBot_v1();
     
     protected:
         SVec2 FindTurn(game::SGameState const& gameState) override;

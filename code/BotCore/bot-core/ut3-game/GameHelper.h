@@ -9,9 +9,11 @@
 namespace ut3 {
 namespace game {
 
-    using FindTurnFunc = std::function<SVec2(SGameState const& gameState)>;
+using FindTurnFunc = std::function<SVec2(SGameState const& gameState)>;
 
-    SGameState PlayGame(std::array<FindTurnFunc, 2> bots, SGameState gameState = SGameState());
+SGameState PlayGame(std::array<FindTurnFunc, 2> bots, SGameState gameState = SGameState());
+
+SGameState PlayRandomGame(SGameState gameState, size_t const maxDepth);
 
 }
 }

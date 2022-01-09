@@ -9,6 +9,7 @@ namespace common {
     unsigned int UpdateRandomSeed(unsigned int seed = 0);
     // exclusive max
     unsigned int GetRandomUInt32(unsigned int const minVal, unsigned int const maxVal);
+    size_t GetRandomSizeT(size_t const minVal, size_t const maxVal);
 
     template<typename TIter>
     inline TIter GetRandomItem(TIter first, TIter last)

@@ -9,41 +9,55 @@
 namespace ut3 {
 namespace bot {
 
-    SOutputData CBotBase::FirstUpdate(SInputData initData)
+CBotBase::CBotBase(char const* botName)
+    : m_timeout(90)
+    , m_botName(botName)
+{
+    Reset();
+}
+
+SOutputData CBotBase::FirstUpdate(SInputData initData)
+{
+    if (initData.m_oppTurnX >= 0)
     {
-        if (initData.m_oppTurnX >= 0)
-        {
-            m_myPlayer = 1;
-            return Update(initData);
-        }
-        else
-        {
-            m_myPlayer = 0;
-            auto const turn = FindTurn(m_gameState);
-            game::MakeTurn(m_gameState, turn[0], turn[1]);
-            return { turn[0], turn[1] };
-        }
+        m_myPlayer = 1;
+        return Update(initData);
     }
-
-    SOutputData CBotBase::Update(SInputData turnData)
+    else
     {
-        game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
-        if (m_isDebugEnabled)
-        {
-            game::SGameStateView(m_gameState).Print();
-        }
-
+        m_myPlayer = 0;
         auto const turn = FindTurn(m_gameState);
-
         game::MakeTurn(m_gameState, turn[0], turn[1]);
         return { turn[0], turn[1] };
     }
+}
 
-    void CBotBase::Reset()
+SOutputData CBotBase::Update(SInputData turnData)
+{
+    game::MakeTurn(m_gameState, turnData.m_oppTurnX, turnData.m_oppTurnY);
+    if (m_isDebugEnabled)
     {
-        m_gameState = game::SGameState();
-        m_myPlayer = -1;
-        m_isDebugEnabled = false;
+        game::SGameStateView(m_gameState).Print();
     }
+
+    auto const turn = FindTurn(m_gameState);
+
+    game::MakeTurn(m_gameState, turn[0], turn[1]);
+    return { turn[0], turn[1] };
+}
+
+void CBotBase::Reset()
+{
+    m_gameState = game::SGameState();
+    m_myPlayer = -1;
+    m_isDebugEnabled = false;
+}
+
+void CBotBase::SetState(game::SGameState const& gameState)
+{
+    m_gameState = gameState;
+    m_myPlayer = GAME_STATE_GET_PLAYER(gameState);
+}
+
 }
 }

@@ -9,6 +9,7 @@
 #include "mimax/dma/tasks/MctsTask.h"
 #include "mimax/mt/TasksRunner.h"
 
+#include "bot-core/ut3-game/GameHelper.h"
 #include "bot-core/ut3-game/GameStateView.h"
 
 namespace ut3 {
@@ -119,27 +120,13 @@ CUT3MctsResolver::CUT3MctsResolver(size_t const maxDepth)
 
 float CUT3MctsResolver::Playout(game::SGameState const& state)
 {
-    int myPlayer = GAME_STATE_GET_PLAYER(state);
-    game::SGameState curState = state;
-
-    game::Turns moves;
-    for (size_t depth = 0; depth <= m_maxDepth; ++depth)
-    {
-        game::CollectPossibleTurns(curState, moves);
-        if (moves.empty()) break;
-
-        auto const move = *mimax::common::GetRandomItem(moves.begin(), moves.end());
-        game::MakeTurn(curState, move[0], move[1]);
-    }
-
+    int const myPlayer = GAME_STATE_GET_PLAYER(state);
+    game::SGameState const curState = ut3::game::PlayRandomGame(state, m_maxDepth);
     return CalculateScore(curState, myPlayer);
 }
 
-CMCTSBot_v1::CMCTSBot_v1()
-    : CMCTSBot_v1(1.41f, 7)
-{}
-
-CMCTSBot_v1::CMCTSBot_v1(float explorationParam, size_t const maxDepth)
+CMCTSBot_v1::CMCTSBot_v1(float explorationParam, size_t const maxDepth, char const* botName)
+    : CBotBase(botName)
 {
     CUT3MctsMathHelper::Initialize();
 
@@ -161,7 +148,7 @@ CMCTSBot_v1::CMCTSBot_v1(float explorationParam, size_t const maxDepth)
 void CMCTSBot_v1::Reset()
 {
 #if MIMAX_MCTS_DEBUG
-    m_debugStatsHistory.clear();
+    //m_debugStatsHistory.clear();
 #endif // MIMAX_MCTS_DEBUG
     CBotBase::Reset();
 }
@@ -198,7 +185,7 @@ SVec2 CMCTSBot_v1::FindTurn(game::SGameState const& gameState)
         tasksToRun.push_back(&mctsTask);
     }
 
-    mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, std::chrono::milliseconds(90));
+    mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, m_timeout);
 
     if (m_isDebugEnabled)
     {

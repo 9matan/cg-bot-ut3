@@ -11,7 +11,8 @@ namespace bot {
     {
     public:
         static SVec2 FindTurn(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled = false);
-        char const* GetBotName() const { return "CRandomBot_v1"; }
+    public:
+        CRandomBot_v1();
     protected:
         SVec2 FindTurn(game::SGameState const& gameState) override;
     };

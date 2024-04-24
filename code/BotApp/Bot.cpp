@@ -1,8 +1,10 @@
 #include "BotHeader.h"
 
+#include <chrono>
+
 #include "mimax/common/Random.h"
 #include "mimax/common/Profiler.h"
-#include "bot-core/bot/MCTSBot_v1.h"
+#include "bot-core/bot/BotFactory.h"
 
 void ReadData(ut3::SInputData& inputData)
 {
@@ -46,20 +48,21 @@ int main()
 	ut3::SInputData inData;
 
 	ReadData(inData);
-	ut3::bot::CMCTSBot_v1 bot(0.35f, 60);
+	auto bot = ut3::bot::CreateMctsBot(0.35f, 30);
 #if RELEASE_BOT
-	bot.SetDebugIsEnabled(false);
+	bot->SetDebugIsEnabled(false);
 #else
-	bot.SetDebugIsEnabled(true);
+	bot->SetDebugIsEnabled(true);
 #endif
-	WriteData(bot.FirstUpdate(inData));
+	bot->SetTimeout(std::chrono::milliseconds(90));
+	WriteData(bot->FirstUpdate(inData));
 
 	while (true)
 	{
 		ReadData(inData);
 		{
 			PROFILE_TIME("Update");
-			WriteData(bot.Update(inData));
+			WriteData(bot->Update(inData));
 		}
 	}
 

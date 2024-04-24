@@ -1,5 +1,5 @@
 #include "BotCore_PCH.h"
-#include "bot-core/bot/MinimaxBot_v1.h"
+#include "bot-core/bot/BbMinimax.h"
 
 #include <chrono>
 #include <thread>
@@ -18,65 +18,62 @@ using namespace std::chrono_literals;
 namespace ut3 {
 namespace bot {
 
-namespace
+namespace {
+
+class CUT3MinimaxResolver
 {
-    class CUT3MinimaxResolver
+public:
+    CUT3MinimaxResolver(int const myPlayer)
+        : m_myPlayer(myPlayer)
+    {}
+
+    float EvaluateState(game::SGameState const& state)
     {
-    public:
-        CUT3MinimaxResolver(int const myPlayer)
-            : m_myPlayer(myPlayer)
-        {}
-
-        float EvaluateState(game::SGameState const& state)
+        int const gameWinner = GAME_STATE_GET_GAME_WINNER(state);
+        if (gameWinner != GAME_STATE_ELEMENT_EMPTY)
         {
-            int const gameWinner = GAME_STATE_GET_GAME_WINNER(state);
-            if (gameWinner != GAME_STATE_ELEMENT_EMPTY)
-            {
-                if (gameWinner == GAME_STATE_ELEMENT_DRAW) return 0.0f;
-                float const depthScore = GAME_STATE_ELEMENTS_COUNT(state) * 0.01f;
-                if (gameWinner == GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(m_myPlayer)) return 10.0f - depthScore;
-                return -(10.0f - depthScore);
-            }
+            if (gameWinner == GAME_STATE_ELEMENT_DRAW) return 0.0f;
+            float const depthScore = GAME_STATE_ELEMENTS_COUNT(state) * 0.01f;
+            if (gameWinner == GAME_STATE_PLAYER_INDEX_TO_PLAYER_ELEMENT(m_myPlayer)) return 10.0f - depthScore;
+            return -(10.0f - depthScore);
+        }
 
-            auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);
+        auto const globalBlock = GAME_STATE_GET_GLOBAL_BLOCK(state);
 
-            int const oppPlayer = ((m_myPlayer + 1) & 1);
+        int const oppPlayer = ((m_myPlayer + 1) & 1);
                 
-            int const myBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, m_myPlayer);
-            int const oppBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, oppPlayer);
+        int const myBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, m_myPlayer);
+        int const oppBlocksCnt = (int)GAME_STATE_BLOCK_COUNT_PLAYER_ELEMENTS(globalBlock, oppPlayer);
 
-            return (float)(myBlocksCnt - oppBlocksCnt);
-        }
+        return (float)(myBlocksCnt - oppBlocksCnt);
+    }
 
-        void GetPossibleMoves(game::Turns& turnsOut, game::SGameState const& state)
-        {
-            game::CollectPossibleTurns(state, turnsOut);
-            mimax::common::RandomShuffle(turnsOut.begin(), turnsOut.end());
-        }
+    void GetPossibleMoves(game::Turns& turnsOut, game::SGameState const& state)
+    {
+        game::CollectPossibleTurns(state, turnsOut);
+        mimax::common::RandomShuffle(turnsOut.begin(), turnsOut.end());
+    }
 
-        void MakeMove(game::SGameState& state, SVec2 move)
-        {
-            game::MakeTurn(state, move[0], move[1]);
-        }
+    void MakeMove(game::SGameState& state, SVec2 move)
+    {
+        game::MakeTurn(state, move[0], move[1]);
+    }
 
-    private:
-        int m_myPlayer;
-    };
+private:
+    int m_myPlayer;
+};
 
-    using CUT3MinimaxAlgo = mimax::dma::CMinimaxBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
-    using CMinimaxTask = mimax::dma::CMinimaxTask<CUT3MinimaxAlgo>;
-}
+using CUT3MinimaxAlgo = mimax::dma::CMinimaxBase<game::SGameState, SVec2, game::Turns, CUT3MinimaxResolver>;
+using CMinimaxTask = mimax::dma::CMinimaxTask<CUT3MinimaxAlgo>;
 
-CMinimaxBot_v1::CMinimaxBot_v1()
-    : CBotBase("CMinimaxBot_v1")
-{}
+} // namespace
 
-SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState)
+void CBbMinimax::Initialize(game::SGameState const& /*gameState*/, SBotBehaviorInitParams const& initParams)
 {
-    return FindTurn(gameState, m_myPlayer, m_isDebugEnabled);
+    m_params = initParams;
 }
 
-SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPlayer, bool const debugEnabled)
+SVec2 CBbMinimax::FindTurn(game::SGameState const& gameState)
 {
     if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0)
     {
@@ -93,7 +90,7 @@ SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPl
     std::vector<CUT3MinimaxAlgo> minimaxAlgos;
     std::vector<CMinimaxTask> minimaxTasks;
     std::vector<mimax::mt::ITask*> tasksToRun;
-    CUT3MinimaxResolver resolver(myPlayer);
+    CUT3MinimaxResolver resolver(GAME_STATE_GET_PLAYER(gameState));
     CUT3MinimaxAlgo::SConfig config;
     config.m_minValue = minScoreValue;
     config.m_maxValue = 10.0f;
@@ -114,7 +111,7 @@ SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPl
         tasksToRun.push_back(&minimaxTask);
     }
 
-    mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, 95ms);
+    mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, m_params.m_timeout);
     SVec2 turn = { -1, -1 };
     for (int i = (int)minimaxTasks.size() - 1; i >= 0; --i)
     {
@@ -123,7 +120,7 @@ SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPl
         {
             turn = move.value();
 #if MIMAX_MINIMAX_DEBUG
-            if (debugEnabled)
+            if (m_params.m_isDebugEnabled)
             {
                 std::cerr << minimaxAlgos[i].GetDebugInfo();
             }
@@ -143,5 +140,5 @@ SVec2 CMinimaxBot_v1::FindTurn(game::SGameState const& gameState, int const myPl
     return turn;
 }
 
-}
-}
+} // bot
+} // ut3

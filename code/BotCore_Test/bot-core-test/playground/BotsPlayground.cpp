@@ -82,10 +82,6 @@ namespace bot {
             }
 
             OnMatchEnded(gameState, matchStats);
-            for (auto bot : bots)
-            {
-                bot->OnMatchEnded();
-            }
 
             std::swap(xBot, oBot);
         }

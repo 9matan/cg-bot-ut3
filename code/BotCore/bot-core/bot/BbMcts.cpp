@@ -1,5 +1,5 @@
 #include "BotCore_PCH.h"
-#include "bot-core/bot/MCTSBot_v1.h"
+#include "bot-core/bot/BbMcts.h"
 
 #include <chrono>
 #include <thread>
@@ -50,9 +50,9 @@ inline static float CalculateScore(game::SGameState const& state, int myPlayer)
 }
 
 #if MIMAX_MCTS_DEBUG
-inline static CMCTSBot_v1::SDebugStats CalculateDebugStats(std::vector<CUT3Mcts> const& mctsAlgos)
+inline static CBbMcts::SDebugStats CalculateDebugStats(std::vector<CUT3Mcts> const& mctsAlgos)
 {
-    CMCTSBot_v1::SDebugStats debugStats;
+    CBbMcts::SDebugStats debugStats;
 
     for (auto const& algo : mctsAlgos)
     {
@@ -69,9 +69,9 @@ inline static CMCTSBot_v1::SDebugStats CalculateDebugStats(std::vector<CUT3Mcts>
     return debugStats;
 }
 
-inline static CMCTSBot_v1::SDebugStats GetAverageDebugStats(std::vector<CMCTSBot_v1::SDebugStats> const& debugStatsHistory)
+inline static CBbMcts::SDebugStats GetAverageDebugStats(std::vector<CBbMcts::SDebugStats> const& debugStatsHistory)
 {
-    CMCTSBot_v1::SDebugStats averageDebugStats;
+    CBbMcts::SDebugStats averageDebugStats;
 
     for (auto const& debugStats : debugStatsHistory)
     {
@@ -125,19 +125,24 @@ float CUT3MctsResolver::Playout(game::SGameState const& state)
     return CalculateScore(curState, myPlayer);
 }
 
-CMCTSBot_v1::CMCTSBot_v1(float explorationParam, size_t const maxDepth, char const* botName)
-    : CBotBase(botName)
+CBbMcts::CBbMcts(float const explorationParam, size_t const maxDepth)
+    : m_explorationParam(explorationParam)
+    , m_maxDepth(maxDepth)
+{}
+
+void CBbMcts::Initialize(game::SGameState const& /*gameState*/, SBotBehaviorInitParams const& initParams)
 {
+    m_params = initParams;
     CUT3MctsMathHelper::Initialize();
 
     auto const hardwareConcurrency = std::thread::hardware_concurrency();
     m_mctsAlgos.reserve(hardwareConcurrency);
 
-    std::mt19937_64 randEngine(time(NULL));
-    CUT3MctsResolver resolver(maxDepth);
+    std::mt19937_64 randEngine(m_params.m_randomSeed);
+    CUT3MctsResolver resolver(m_maxDepth);
     CUT3Mcts::SConfig config;
     config.m_nodesPoolSize = 200000;
-    config.m_explorationParam = explorationParam;
+    config.m_explorationParam = m_explorationParam;
     for (size_t i = 0; i < hardwareConcurrency; ++i)
     {
         config.m_randomSeed = randEngine();
@@ -145,15 +150,8 @@ CMCTSBot_v1::CMCTSBot_v1(float explorationParam, size_t const maxDepth, char con
     }
 }
 
-void CMCTSBot_v1::Reset()
-{
-#if MIMAX_MCTS_DEBUG
-    //m_debugStatsHistory.clear();
-#endif // MIMAX_MCTS_DEBUG
-    CBotBase::Reset();
-}
-
-void CMCTSBot_v1::OnMatchEnded()
+/*
+void CBbMcts::OnMatchEnded()
 {
 #if MIMAX_MCTS_DEBUG
     auto const debugStats = GetAverageDebugStats(m_debugStatsHistory);
@@ -164,8 +162,9 @@ void CMCTSBot_v1::OnMatchEnded()
     std::cerr << "Visited nodes count: " << debugStats.m_totalVisitedNodesCnt << "\n";
 #endif // MIMAX_MCTS_DEBUG
 }
+*/
 
-SVec2 CMCTSBot_v1::FindTurn(game::SGameState const& gameState)
+SVec2 CBbMcts::FindTurn(game::SGameState const& gameState)
 {
     if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0)
     {
@@ -185,21 +184,23 @@ SVec2 CMCTSBot_v1::FindTurn(game::SGameState const& gameState)
         tasksToRun.push_back(&mctsTask);
     }
 
-    mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, m_timeout);
+    mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, m_params.m_timeout);
 
-    if (m_isDebugEnabled)
+#if MIMAX_MCTS_DEBUG
+    if (m_params.m_isDebugEnabled)
     {
-#if MIMAX_MCTS_DEBUG
         std::cerr << m_mctsAlgos.front().GetDebugInfo();
-#endif // MIMAX_MCTS_DEBUG
     }
-
-#if MIMAX_MCTS_DEBUG
     m_debugStatsHistory.push_back(CalculateDebugStats(m_mctsAlgos));
 #endif // MIMAX_MCTS_DEBUG
 
     return CalculateBestMove(m_mctsAlgos);
 }
 
+void CBbMcts::Shutdown()
+{
+    m_mctsAlgos.clear();
 }
-}
+
+} // bot
+} // ut3

@@ -1,5 +1,5 @@
 #include "BotCore_PCH.h"
-#include "bot-core/bot/RandomBot_v1.h"
+#include "bot-core/bot/BbRandom.h"
 
 #include "mimax/common/Random.h"
 
@@ -9,11 +9,7 @@
 namespace ut3 {
 namespace bot {
 
-CRandomBot_v1::CRandomBot_v1()
-    : CBotBase("CRandomBot_v1")
-{}
-
-SVec2 CRandomBot_v1::FindTurn(game::SGameState const& gameState, int const /*myPlayer*/, bool const /*debugEnabled*/)
+SVec2 CBbRandom::FindTurn(game::SGameState const& gameState)
 {
     mimax::common::UpdateRandomSeed();
     game::Turns turns;
@@ -21,10 +17,5 @@ SVec2 CRandomBot_v1::FindTurn(game::SGameState const& gameState, int const /*myP
     return *mimax::common::GetRandomItem(turns.begin(), turns.end());
 }
 
-SVec2 CRandomBot_v1::FindTurn(game::SGameState const& gameState)
-{
-    return FindTurn(gameState, m_myPlayer, m_isDebugEnabled);
-}
-
-}
-}
+} // bot
+} // ut3

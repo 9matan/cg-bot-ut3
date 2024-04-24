@@ -8,7 +8,8 @@
 #endif // MIMAX_MCTS_DEBUG
 
 
-#include "bot-core/bot/BotBase.h"
+#include "bot-core/bot/BotBehaviorBase.h"
+#include "bot-core/bot/BotBehaviorInitParams.h"
 
 #include "bot-core/ut3-game/Game.h"
 #include "bot-core/ut3-game/GameState.h"
@@ -64,16 +65,16 @@ private:
 using CUT3MctsMathHelper = CUT3MctsCachedMathHelper<30000>;
 using CUT3Mcts = mimax::dma::CMctsBase<game::SGameState, SVec2, game::Turns, CUT3MctsResolver, CUT3MctsMathHelper>;
 
-class CMCTSBot_v1 : public CBotBase
+class CBbMcts : public CBotBehaviorBase
 {
 public:
-    CMCTSBot_v1(float explorationParam, size_t const maxDepth, char const* botName = "CMCTSBot_v1");
+    CBbMcts(float const explorationParam, size_t const maxDepth);
 
-    void Reset() override;
-    void OnMatchEnded() override;
-
-protected:
+    void Initialize(game::SGameState const& gameState, SBotBehaviorInitParams const& initParams) override;
     SVec2 FindTurn(game::SGameState const& gameState) override;
+    void Shutdown() override;
+
+    //void OnMatchEnded() override;
 
 #if MIMAX_MCTS_DEBUG
 public:
@@ -90,7 +91,10 @@ private:
 
 private:
     std::vector<CUT3Mcts> m_mctsAlgos;
+    SBotBehaviorInitParams m_params;
+    float m_explorationParam;
+    size_t m_maxDepth;
 };
 
-}
-}
+} // bot
+} // ut3

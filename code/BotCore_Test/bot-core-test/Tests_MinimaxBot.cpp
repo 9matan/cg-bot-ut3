@@ -2,7 +2,7 @@
 #include <cassert>
 
 #include "bot-core/ut3-game/GameStateHelper.h"
-#include "bot-core/bot/MinimaxBot_v1.h"
+#include "bot-core/bot/BbMinimax.h"
 
 namespace ut3 {
 namespace bot {
@@ -23,7 +23,9 @@ namespace bot {
             };
             auto const gameState = game::CreateGameState(map, {0, 4});
 
-            assert(bot::CMinimaxBot_v1::FindTurn(gameState, 0) == SVec2(2, 3));
+            bot::CBbMinimax bb;
+            bb.Initialize(gameState, bot::SBotBehaviorInitParams());
+            assert(bb.FindTurn(gameState) == SVec2(2, 3));
         }
     }
 

@@ -4,10 +4,7 @@
 
 #include "bot-core/ut3-game/GameHelper.h"
 
-#include "bot-core/bot/CustomBot.h"
-#include "bot-core/bot/MCTSBot_v1.h"
-#include "bot-core/bot/MinimaxBot_v1.h"
-#include "bot-core/bot/RandomBot_v1.h"
+#include "bot-core/bot/BotFactory.h"
 
 #include "bot-core-test/playground/BotsPlayground.h"
 
@@ -87,21 +84,9 @@ namespace bot {
 
     std::vector<IBot*> CreateBots()
     {
-        /*auto randomBotWithOpening = new CCustomBot(
-            [](game::SGameState const& gameState, int const myPlayer, bool const debugEnabled)
-            {
-                if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0) return SVec2{ 4, 4 };
-
-                return CRandomBot_v1::FindTurn(gameState, myPlayer, debugEnabled);
-            }, "Random_v2"
-        );*/
-
         return std::vector<IBot*>{
-            //randomBotWithOpening
-            new CMCTSBot_v1()
-            , new CMCTSBot_v1()
-            //, new CRandomBot_v1()
-            //, new CMinimaxBot_v1()
+            CreateMctsBot(0.35f, 60, "Mcts_1")
+            , CreateMctsBot(0.35f, 35, "Mcts_2")
         };
     }
 
@@ -116,7 +101,7 @@ namespace bot {
     void Run_Playground_Cases()
     {
         auto bots = CreateBots();
-        int const matchesCount = 1;// 20;
+        int const matchesCount = 20;
 
         auto playground = CConsoleBotsPlayground().RunPlayground(bots, matchesCount);
 

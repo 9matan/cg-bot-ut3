@@ -1,5 +1,7 @@
 #Visaul studio
 .vs/
+Properties/
 *.sln
 *.csproj
 *.csproj.user
+*.bin

@@ -51,10 +51,11 @@ int main()
 	auto bot = ut3::bot::CreateMctsBot(0.35f, 30);
 #if RELEASE_BOT
 	bot->SetDebugIsEnabled(false);
+	bot->SetTimeout(std::chrono::milliseconds(90));
 #else
 	bot->SetDebugIsEnabled(true);
+	bot->SetTimeout(std::chrono::milliseconds(80));
 #endif
-	bot->SetTimeout(std::chrono::milliseconds(90));
 	WriteData(bot->FirstUpdate(inData));
 
 	while (true)

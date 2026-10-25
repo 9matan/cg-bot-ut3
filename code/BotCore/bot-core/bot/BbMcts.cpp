@@ -141,7 +141,7 @@ void CBbMcts::Initialize(game::SGameState const& /*gameState*/, SBotBehaviorInit
     std::mt19937_64 randEngine(m_params.m_randomSeed);
     CUT3MctsResolver resolver(m_maxDepth);
     CUT3Mcts::SConfig config;
-    config.m_nodesPoolSize = 200000;
+    config.m_nodesPoolSize = 200000 * 100;
     config.m_explorationParam = m_explorationParam;
     for (size_t i = 0; i < hardwareConcurrency; ++i)
     {
@@ -166,10 +166,14 @@ void CBbMcts::OnMatchEnded()
 
 SVec2 CBbMcts::FindTurn(game::SGameState const& gameState)
 {
-    if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0)
+    /*if(GAME_STATE_ELEMENTS_COUNT(gameState) == 0)
     {
         return { 4, 4 };
-    }
+    }*//*
+    else if(GAME_STATE_ELEMENTS_COUNT(gameState) == 1 && GAME_BLOCK_STATE_GET_ELEMENT_BY_POS(GetBlockState(gameState, 4), 1, 1) != GAME_STATE_ELEMENT_EMPTY)
+    {
+        return { 3, 3 };
+    }*/
 
     std::vector<CUT3MctsTask> mctsTasks;
     std::vector<mimax::mt::ITask*> tasksToRun;

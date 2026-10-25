@@ -5,8 +5,11 @@
 #include "bot-core/ut3-game/GameHelper.h"
 
 #include "bot-core/bot/BotFactory.h"
+#include "bot-core/bot/BbMcts.h"
 
 #include "bot-core-test/playground/BotsPlayground.h"
+
+using namespace std::chrono_literals;
 
 namespace ut3 {
 namespace bot {
@@ -82,11 +85,29 @@ namespace bot {
         };
     }
 
-    std::vector<IBot*> CreateBots()
+    std::vector<IBot*> CreateBots_1()
     {
+        auto bot1 = CreateMctsBot(0.15f, 30, "Mcts_15");
+        bot1->SetTimeout(10ms);
+
+        auto bot2 = CreateMctsBot(0.20f, 30, "Mcts_20");
+        bot2->SetTimeout(10ms);
+
+        auto bot3 = CreateMctsBot(0.25f, 30, "Mcts_25");
+        bot3->SetTimeout(10ms);
+
+        auto bot4 = CreateMctsBot(0.30f, 30, "Mcts_30");
+        bot4->SetTimeout(10ms);
+
+        auto bot5 = CreateMctsBot(0.45f, 30, "Mcts_45");
+        bot5->SetTimeout(10ms);
+
         return std::vector<IBot*>{
-            CreateMctsBot(0.35f, 60, "Mcts_1")
-            , CreateMctsBot(0.35f, 35, "Mcts_2")
+            bot1
+            , bot2
+            , bot3
+            , bot4
+            , bot5
         };
     }
 
@@ -98,10 +119,10 @@ namespace bot {
         }
     }
 
-    void Run_Playground_Cases()
+    void Run_Playground_Cases() 
     {
-        auto bots = CreateBots();
-        int const matchesCount = 20;
+        auto bots = CreateBots_1();
+        int const matchesCount = 50;
 
         auto playground = CConsoleBotsPlayground().RunPlayground(bots, matchesCount);
 

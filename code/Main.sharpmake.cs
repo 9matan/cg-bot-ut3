@@ -4,6 +4,7 @@ using Sharpmake;
 [module: Sharpmake.Include(@"BotApp_Packed\BotApp_Packed.sharpmake.cs")]
 [module: Sharpmake.Include(@"BotCore\BotCore.sharpmake.cs")]
 [module: Sharpmake.Include(@"BotCore_Test\BotCore_Test.sharpmake.cs")]
+[module: Sharpmake.Include(@"BotUtility\BotUtility.sharpmake.cs")]
 [module: Sharpmake.Include(@"Sharpmake\Common.sharpmake.cs")]
 
 [module: Sharpmake.Include(@"..\external\mimax\code\Mimax\Mimax.sharpmake.cs")]
@@ -35,6 +36,7 @@ public class CGBotSolution : CommonSolution
 		conf.AddProject<BotAppPackedProject>(target);
 		conf.AddProject<BotCoreProject>(target);
 		conf.AddProject<BotCoreTestProject>(target);
+		conf.AddProject<BotUtilityProject>(target);
 
 		conf.SetStartupProject<BotCoreTestProject>();
     }
@@ -74,7 +76,7 @@ public static class Main
     [Sharpmake.Main]
     public static void SharpmakeMain(Sharpmake.Arguments arguments)
     {
-		KitsRootPaths.SetUseKitsRootForDevEnv(DevEnv.vs2019, KitsRootEnum.KitsRoot10, Options.Vc.General.WindowsTargetPlatformVersion.Latest);
+		KitsRootPaths.SetUseKitsRootForDevEnv(DevEnv.vs2022, KitsRootEnum.KitsRoot10, Options.Vc.General.WindowsTargetPlatformVersion.v10_0_22621_0);
 
 		arguments.Generate<CGBotSolution>();
     }

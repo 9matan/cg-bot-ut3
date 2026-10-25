@@ -4,7 +4,7 @@
 #	pragma GCC optimize("omit-frame-pointer")
 #	pragma GCC optimize("unroll-loops")
 #	pragma GCC optimize("Ofast")
-/*
+
 #pragma GCC optimize("thread-jumps")
 #pragma GCC optimize("align-functions")
 #pragma GCC optimize("align-jumps")
@@ -42,7 +42,7 @@
 #pragma GCC optimize("gcse-after-reload")
 #pragma GCC optimize("tree-vectorize")
 #pragma GCC optimize("ipa-cp-clone")
-*/
+
 #endif // defined(__GNUC__) || defined(__GNUG__)
 
 // #define RELEASE_BOT (1) // [Enable]

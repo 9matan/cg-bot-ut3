@@ -54,7 +54,7 @@ namespace bot {
             for (auto bot : bots)
             {
                 bot->Reset();
-                bot->SetDebugIsEnabled(false);
+                //bot->SetDebugIsEnabled(false);
             }
 
             auto const gameState = game::PlayGame({ CFindNextTurn(xBot), CFindNextTurn(oBot) });

@@ -5,6 +5,45 @@
 #pragma GCC optimize("omit-frame-pointer")
 #pragma GCC optimize("unroll-loops")
 #pragma GCC optimize("Ofast")
+
+#pragma GCC optimize("thread-jumps")
+#pragma GCC optimize("align-functions")
+#pragma GCC optimize("align-jumps")
+#pragma GCC optimize("align-loops")
+#pragma GCC optimize("align-labels")
+#pragma GCC optimize("caller-saves")
+#pragma GCC optimize("crossjumping")
+#pragma GCC optimize("cse-follow-jumps")
+#pragma GCC optimize("cse-skip-blocks")
+#pragma GCC optimize("delete-null-pointer-checks")
+#pragma GCC optimize("expensive-optimizations")
+#pragma GCC optimize("gcse")
+#pragma GCC optimize("gcse-lm")
+#pragma GCC optimize("inline-small-functions")
+#pragma GCC optimize("indirect-inlining")
+#pragma GCC optimize("ipa-sra")
+#pragma GCC optimize("optimize-sibling-calls")
+#pragma GCC optimize("peephole2")
+#pragma GCC optimize("regmove")
+#pragma GCC optimize("reorder-blocks")
+#pragma GCC optimize("reorder-functions")
+#pragma GCC optimize("rerun-cse-after-loop")
+#pragma GCC optimize("sched-interblock")
+#pragma GCC optimize("sched-spec")
+#pragma GCC optimize("schedule-insns")
+#pragma GCC optimize("schedule-insns2")
+#pragma GCC optimize("strict-aliasing")
+#pragma GCC optimize("strict-overflow")
+#pragma GCC optimize("tree-switch-conversion")
+#pragma GCC optimize("tree-pre")
+#pragma GCC optimize("tree-vrp")
+#pragma GCC optimize("inline-functions")
+#pragma GCC optimize("unswitch-loops")
+#pragma GCC optimize("predictive-commoning")
+#pragma GCC optimize("gcse-after-reload")
+#pragma GCC optimize("tree-vectorize")
+#pragma GCC optimize("ipa-cp-clone")
+
 #endif 
 
 #define RELEASE_BOT (1) 
@@ -157,11 +196,11 @@ std::cerr << "_GLIBCXX_INLINE_VERSION: " << _GLIBCXX_INLINE_VERSION << "\n";
 #endif
 ut3::SInputData inData;ReadData(inData);auto bot = ut3::bot::CreateMctsBot(0.35f, 30);
 #if RELEASE_BOT
-bot->SetDebugIsEnabled(false);
+bot->SetDebugIsEnabled(false);bot->SetTimeout(std::chrono::milliseconds(90));
 #else
-bot->SetDebugIsEnabled(true);
+bot->SetDebugIsEnabled(true);bot->SetTimeout(std::chrono::milliseconds(80));
 #endif
-bot->SetTimeout(std::chrono::milliseconds(90));WriteData(bot->FirstUpdate(inData));while (true){ReadData(inData);{PROFILE_TIME("Update");WriteData(bot->Update(inData));}}return 0;}
+WriteData(bot->FirstUpdate(inData));while (true){ReadData(inData);{PROFILE_TIME("Update");WriteData(bot->Update(inData));}}return 0;}
 
 #define _CRT_SECURE_NO_WARNINGS
 namespace mimax {namespace common {class CMathHelper{public:static inline float log(float const val) { return ::log(val); }static inline float sqrt(float const val) { return ::sqrt(val); }};} } 
@@ -295,18 +334,14 @@ namespace ut3 {namespace bot {using CUT3MctsTask = mimax::dma::CMctsTask<CUT3Mct
 #if MIMAX_MCTS_DEBUG
 inline static CBbMcts::SDebugStats CalculateDebugStats(std::vector<CUT3Mcts> const& mctsAlgos){CBbMcts::SDebugStats debugStats;for (auto const& algo : mctsAlgos){auto const& debugInfo = algo.GetDebugInfo();debugStats.m_simulationsCnt += debugInfo.m_simulationsCnt;debugStats.m_totalNodesCnt += debugInfo.m_totalNodesCnt;debugStats.m_totalVisitedNodesCnt += debugInfo.m_totalVisitedNodesCnt;}debugStats.m_simulationsCnt /= (float)mctsAlgos.size();debugStats.m_totalNodesCnt /= (float)mctsAlgos.size();debugStats.m_totalVisitedNodesCnt /= (float)mctsAlgos.size();return debugStats;}inline static CBbMcts::SDebugStats GetAverageDebugStats(std::vector<CBbMcts::SDebugStats> const& debugStatsHistory){CBbMcts::SDebugStats averageDebugStats;for (auto const& debugStats : debugStatsHistory){averageDebugStats.m_simulationsCnt += debugStats.m_simulationsCnt;averageDebugStats.m_totalNodesCnt += debugStats.m_totalNodesCnt;averageDebugStats.m_totalVisitedNodesCnt += debugStats.m_totalVisitedNodesCnt;}averageDebugStats.m_simulationsCnt /= (float)debugStatsHistory.size();averageDebugStats.m_totalNodesCnt /= (float)debugStatsHistory.size();averageDebugStats.m_totalVisitedNodesCnt /= (float)debugStatsHistory.size();return averageDebugStats;}
 #endif 
-} template<size_t TCacheSize>void CUT3MctsCachedMathHelper<TCacheSize>::Initialize(){static bool isInitialized = false;if (isInitialized) return;isInitialized = true;ms_sqrtCache[0] = 0.0f;for (int i = 1; i < TCacheSize; ++i){ms_sqrtCache[i] = ::sqrt((float)i / 100.0f);ms_logCache[i] = (float)::log(i);}}template<size_t TCacheSize>std::array<float, TCacheSize> CUT3MctsCachedMathHelper<TCacheSize>::ms_sqrtCache;template<size_t TCacheSize>std::array<float, TCacheSize> CUT3MctsCachedMathHelper<TCacheSize>::ms_logCache;CUT3MctsResolver::CUT3MctsResolver(size_t const maxDepth): m_maxDepth(maxDepth){}float CUT3MctsResolver::Playout(game::SGameState const& state){int const myPlayer = GAME_STATE_GET_PLAYER(state);game::SGameState const curState = ut3::game::PlayRandomGame(state, m_maxDepth);return CalculateScore(curState, myPlayer);}CBbMcts::CBbMcts(float const explorationParam, size_t const maxDepth): m_explorationParam(explorationParam), m_maxDepth(maxDepth){}void CBbMcts::Initialize(game::SGameState const& /*gameState*/, SBotBehaviorInitParams const& initParams){using namespace std::chrono;m_params = initParams;CUT3MctsMathHelper::Initialize();auto const hardwareConcurrency = std::thread::hardware_concurrency();m_mctsAlgos.reserve(hardwareConcurrency);std::mt19937_64 randEngine(m_params.m_randomSeed);CUT3MctsResolver resolver(m_maxDepth);CUT3Mcts::SConfig config;config.m_nodesPoolSize = 200000;config.m_explorationParam = m_explorationParam;for (size_t i = 0; i < hardwareConcurrency; ++i){config.m_randomSeed = randEngine();m_mctsAlgos.emplace_back(resolver, config);}}SVec2 CBbMcts::FindTurn(game::SGameState const& gameState){if (GAME_STATE_ELEMENTS_COUNT(gameState) == 0){return { 4, 4 };}std::vector<CUT3MctsTask> mctsTasks;std::vector<mimax::mt::ITask*> tasksToRun;mctsTasks.reserve(m_mctsAlgos.size());tasksToRun.reserve(m_mctsAlgos.size());for (size_t i = 0; i < m_mctsAlgos.size(); ++i){m_mctsAlgos[i].Reset(gameState);auto& mctsTask = mctsTasks.emplace_back(&(m_mctsAlgos[i]));tasksToRun.push_back(&mctsTask);}mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, m_params.m_timeout);if (m_params.m_isDebugEnabled){
+} template<size_t TCacheSize>void CUT3MctsCachedMathHelper<TCacheSize>::Initialize(){static bool isInitialized = false;if (isInitialized) return;isInitialized = true;ms_sqrtCache[0] = 0.0f;for (int i = 1; i < TCacheSize; ++i){ms_sqrtCache[i] = ::sqrt((float)i / 100.0f);ms_logCache[i] = (float)::log(i);}}template<size_t TCacheSize>std::array<float, TCacheSize> CUT3MctsCachedMathHelper<TCacheSize>::ms_sqrtCache;template<size_t TCacheSize>std::array<float, TCacheSize> CUT3MctsCachedMathHelper<TCacheSize>::ms_logCache;CUT3MctsResolver::CUT3MctsResolver(size_t const maxDepth): m_maxDepth(maxDepth){}float CUT3MctsResolver::Playout(game::SGameState const& state){int const myPlayer = GAME_STATE_GET_PLAYER(state);game::SGameState const curState = ut3::game::PlayRandomGame(state, m_maxDepth);return CalculateScore(curState, myPlayer);}CBbMcts::CBbMcts(float const explorationParam, size_t const maxDepth): m_explorationParam(explorationParam), m_maxDepth(maxDepth){}void CBbMcts::Initialize(game::SGameState const& /*gameState*/, SBotBehaviorInitParams const& initParams){m_params = initParams;CUT3MctsMathHelper::Initialize();auto const hardwareConcurrency = std::thread::hardware_concurrency();m_mctsAlgos.reserve(hardwareConcurrency);std::mt19937_64 randEngine(m_params.m_randomSeed);CUT3MctsResolver resolver(m_maxDepth);CUT3Mcts::SConfig config;config.m_nodesPoolSize = 200000;config.m_explorationParam = m_explorationParam;for (size_t i = 0; i < hardwareConcurrency; ++i){config.m_randomSeed = randEngine();m_mctsAlgos.emplace_back(resolver, config);}}SVec2 CBbMcts::FindTurn(game::SGameState const& gameState){std::vector<CUT3MctsTask> mctsTasks;std::vector<mimax::mt::ITask*> tasksToRun;mctsTasks.reserve(m_mctsAlgos.size());tasksToRun.reserve(m_mctsAlgos.size());for (size_t i = 0; i < m_mctsAlgos.size(); ++i){m_mctsAlgos[i].Reset(gameState);auto& mctsTask = mctsTasks.emplace_back(&(m_mctsAlgos[i]));tasksToRun.push_back(&mctsTask);}mimax::mt::CTasksRunner().RunTasksAndWait(tasksToRun, m_params.m_timeout);
 #if MIMAX_MCTS_DEBUG
-std::cerr << m_mctsAlgos.front().GetDebugInfo();
-#endif 
-}
-#if MIMAX_MCTS_DEBUG
-m_debugStatsHistory.push_back(CalculateDebugStats(m_mctsAlgos));
+if (m_params.m_isDebugEnabled){std::cerr << m_mctsAlgos.front().GetDebugInfo();}m_debugStatsHistory.push_back(CalculateDebugStats(m_mctsAlgos));
 #endif 
 return CalculateBestMove(m_mctsAlgos);}void CBbMcts::Shutdown(){m_mctsAlgos.clear();}} } 
 
 #if MIMAX_MCTS_DEBUG
-namespace mimax {namespace dma {std::ostream& operator<<(std::ostream& o, SMctsDebugInfo const& debugInfo){o << "Max depth: " << debugInfo.GetMaxDepth() << "\n";o << "Simulations count: " << debugInfo.m_simulationsCnt << "\n";o << "Nodes count " << debugInfo.m_totalNodesCnt << ": \n";for (size_t depth = 1; depth <= debugInfo.m_nodesCnt.size(); ++depth){o << depth << ": " << debugInfo.m_nodesCnt[depth] << "\n";}o << "Visited nodes count " << debugInfo.m_totalVisitedNodesCnt << ": \n";for (size_t depth = 1; depth <= debugInfo.m_visitedNodesCnt.size(); ++depth){o << depth << ": " << debugInfo.m_visitedNodesCnt[depth] << "\n";}return o;}} } 
+namespace mimax {namespace dma {std::ostream& operator<<(std::ostream& o, SMctsDebugInfo const& debugInfo){o << "Max depth: " << debugInfo.GetMaxDepth() << "\n";o << "Simulations count: " << debugInfo.m_simulationsCnt << "\n";o << "Nodes count " << debugInfo.m_totalNodesCnt << ": \n";for (size_t depth = 1; depth < debugInfo.m_nodesCnt.size(); ++depth){o << depth << ": " << debugInfo.m_nodesCnt[depth] << "\n";}o << "Visited nodes count " << debugInfo.m_totalVisitedNodesCnt << ": \n";for (size_t depth = 1; depth < debugInfo.m_visitedNodesCnt.size(); ++depth){o << depth << ": " << debugInfo.m_visitedNodesCnt[depth] << "\n";}return o;}} } 
 #endif 
 
 namespace mimax {namespace common {template<typename TElem>void EraseSwapWithLast(std::vector<TElem>& v, TElem const& elem){auto iter = std::find(v.begin(), v.end(), elem);if (iter == v.end()){return;}std::swap(*iter, v.back());v.pop_back();}}}
